@@ -6,9 +6,7 @@
     - 所有可交互元素包含 role/aria-label 以便后续自动化测试或无障碍提升
   -->
   <nav class="navbar bg-base-100 shadow-sm relative" role="navigation" aria-label="Main navigation">
-    <!-- 左侧：移动端按钮 + 桌面品牌 -->
-    <div class="flex-none flex items-center gap-2">
-      <!-- 移动端按钮：左侧，打开侧边栏。设置为固定定位以与侧边栏内关闭按钮对齐 -->
+    <div class="navbar-start">
       <button
         v-if="!open"
         class="btn btn-ghost lg:hidden mobile-toggle-btn"
@@ -22,20 +20,17 @@
         </svg>
       </button>
 
-      <!-- 桌面上左侧显示品牌 -->
       <a class="btn btn-ghost normal-case text-xl hidden lg:inline-flex" :href="brandHref" role="link">{{ brand }}</a>
     </div>
 
-    <!-- 中间：移动端品牌居中（桌面隐藏） -->
-    <div class="flex-1 flex justify-center">
+    <div class="navbar-center">
       <a class="btn btn-ghost normal-case text-xl lg:hidden" :href="brandHref" role="link">{{ brand }}</a>
     </div>
 
-    <!-- 右侧：桌面菜单放在这里以在 lg 上显示在右侧；保留用户控件空间 -->
-    <div class="flex-none flex items-center gap-2">
+    <div class="navbar-end">
       <ul class="menu menu-horizontal p-0 hidden lg:flex" role="menubar">
         <li v-for="(link, idx) in links" :key="idx" role="none">
-          <a :href="link.href" role="menuitem">{{ link.label }}</a>
+          <a :href="link.href" role="menuitem" class="px-3">{{ link.label }}</a>
         </li>
       </ul>
     </div>
@@ -49,23 +44,23 @@
     <aside
       v-if="open"
       id="mobile-sidebar"
-      class="fixed top-0 left-0 h-full w-64 bg-base-100 z-50 shadow-lg p-4 lg:hidden"
-      role="menu"
+      class="fixed top-0 left-0 h-full w-64 bg-base-100 z-50 shadow-lg p-4 pt-12 lg:hidden"
+      role="dialog"
       aria-label="Mobile navigation"
+      aria-modal="true"
     >
-      <div class="flex items-center justify-start mb-4 gap-3">
-        <!-- 仅保留侧边栏的关闭按钮（品牌仅保留在导航栏中央） -->
-        <button v-if="open" class="btn btn-ghost mobile-toggle-btn" @click="closeMenu" aria-label="Close menu">
+      <div class="relative flex items-center justify-center mb-4">
+        <button class="btn btn-ghost mobile-toggle-btn" @click="closeMenu" aria-label="Close menu" aria-controls="mobile-sidebar" :aria-expanded="open">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      <ul class="menu menu-vertical p-0">
+  <ul class="menu menu-vertical p-0 mobile-menu-list">
         <!-- 移动端菜单：点击后关闭菜单以提升 UX -->
-        <li v-for="(link, idx) in links" :key="`mobile-${idx}`" role="none">
-          <a :href="link.href" role="menuitem" @click="onMobileLinkClick">{{ link.label }}</a>
+        <li v-for="(link, idx) in links" :key="`mobile-${idx}`" role="none" class="w-full">
+          <a :href="link.href" role="menuitem" @click="onMobileLinkClick" class="mobile-menu-link">{{ link.label }}</a>
         </li>
       </ul>
     </aside>
@@ -96,7 +91,7 @@ const props = defineProps<{
   links?: NavLink[]
 }>()
 
-// 控制移动端下拉的布尔值
+// 控制移动端展开的布尔值
 const open = ref(false)
 
 // 使用 computed 提供默认值，避免模板中出现 undefined
@@ -136,19 +131,45 @@ onBeforeUnmount(() => {
   nav .absolute { top: 56px; }
 }
 
-/* 增强移动端侧边栏菜单的可点击性与可读性 */
+  /* 增强移动端侧边栏菜单的可点击性与可读性 */
 @media (max-width: 1024px) {
-  /* 增大菜单项字体、行高以及内边距，保证触控目标至少44-48px */
-  aside[role="menu"] .menu li a {
-    font-size: 1.05rem; /* 从默认略微增大 */
-    line-height: 1.6;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
+  /* 适度缩减菜单项高度以避免与固定关闭按钮冲突 */
+  aside[role="dialog"] .menu li a {
+    font-size: 1rem; /* 轻微减小 */
+    line-height: 1.4;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
   }
 
   /* 强调菜单文字（可选，视觉上更清晰） */
-  aside[role="menu"] .menu li a {
+  aside[role="dialog"] .menu li a {
     font-weight: 500;
+  }
+}
+
+/* 强制移动端菜单的 ul/li/a 占满宽度并覆盖 hover 背景 */
+@media (max-width: 1024px) {
+  .mobile-menu-list {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mobile-menu-list > li {
+    width: 100%;
+    margin: 0;
+  }
+
+  .mobile-menu-link {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem; /* 与之前 px-4 py-2 对应 */
+    border-radius: 0; /* 去掉圆角以确保背景覆盖整行 */
+  }
+
+  .mobile-menu-link:hover,
+  .mobile-menu-link:active {
+    background-color: rgba(0,0,0,0.05); /* 轻微背景，替代 hover:bg-base-200 */
   }
 }
 
@@ -157,7 +178,7 @@ onBeforeUnmount(() => {
   .mobile-toggle-btn {
     position: fixed;
     top: 12px; /* 与导航栏顶部保持一致 */
-    left: 8px; /* 视图左侧内边距 */
+    left: 1rem; /* 与侧边栏内边距对齐 */
     z-index: 60; /* 高于遮罩(z-40)和侧边栏(z-50) */
     display: inline-flex;
     align-items: center;
@@ -167,7 +188,7 @@ onBeforeUnmount(() => {
 }
 
 /* 侧边栏简单过渡（可根据需要细化） */
-aside[role="menu"] {
+aside[role="dialog"] {
   /* 初始已由 v-if 控制渲染，保留 transition 供未来用 v-show 切换 */
   transition: transform 0.2s ease-in-out;
 }
