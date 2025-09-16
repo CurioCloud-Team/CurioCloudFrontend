@@ -9,10 +9,9 @@ import Header from './components/Header.vue'
 import { ref } from 'vue'
 
 const navLinks = ref([
-  // 每一项必须至少包含 label 与 href；可在未来扩展字段
-  { label: 'Home', href: '#' },
-  { label: 'Features', href: '#' },
-  { label: 'Contact', href: '#' }
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/about' },
+  { label: 'Docs', href: 'https://example.com/docs' }
 ])
 </script>
 
@@ -21,5 +20,5 @@ const navLinks = ref([
     顶部 Header：传入 links（响应式）、brand 与 brandHref
     说明：Header 负责响应式与可访问性（ARIA）细节，App 仅提供数据与页面结构
   -->
-  <Header :links="navLinks" brand="CurioCloud" brandHref="#" />
+  <Header :links="navLinks" brand="CurioCloud" brandHref="/" />
 </template>
