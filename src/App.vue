@@ -14,6 +14,7 @@ import HelloWorld from './components/HelloWorld.vue'
   <h1 class="text-3xl font-bold underline">
     Hello world!
   </h1>
+  <button class="btn btn-primary">Button</button>
   <HelloWorld msg="Vite + Vue" />
 </template>
 
