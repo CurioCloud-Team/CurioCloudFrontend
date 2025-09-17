@@ -6,8 +6,9 @@
   - 如需增加子菜单、图标或权限控制，可将每个项扩展为包含更多字段（如 children, icon, roles）
 */
 import Header from './components/Header.vue'
-import Hero from "./components/Hero.vue";
-import {ref} from 'vue'
+import Hero from './components/Hero.vue'
+import Footer from './components/Footer.vue'
+import { ref } from 'vue'
 
 const navLinks = ref([
   { label: 'Home', href: '/' },
@@ -23,9 +24,10 @@ const navLinks = ref([
   -->
   <Header :links="navLinks" brand="CurioCloud" brandHref="/" />
   <Hero
-      buttonText="开始使用"
-      secondaryButtonText="了解更多"
-      subtitle="更懂你的辅助备课系统"
-      title="课研云"
+    buttonText="开始使用"
+    secondaryButtonText="了解更多"
+    subtitle="更懂你的辅助备课系统"
+    title="课研云"
   />
+  <Footer brand="CurioCloud" svgSrc="../public/logo.svg" />
 </template>
