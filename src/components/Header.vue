@@ -24,9 +24,6 @@
               </ul>
             </div>
           </div>
-
-      <!-- Page content here -->
-      <main class="p-4"><slot>Content</slot></main>
     </div>
     <div class="drawer-side">
       <label for="my-drawer-3" aria-label="close sidebar" class="drawer-overlay"></label>
