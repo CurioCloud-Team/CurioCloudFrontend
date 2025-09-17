@@ -9,6 +9,7 @@
  * @property {string} title - Hero 部分的主标题。
  * @property {string} subtitle - Hero 部分的副标题或描述性文本。
  * @property {string} buttonText - 行动号召按钮上显示的文本。
+ * @property {string} [secondaryButtonText] - 次要行动号召按钮上显示的文本（可选）。
  */
 defineProps({
   title: {
@@ -22,6 +23,10 @@ defineProps({
   buttonText: {
     type: String,
     required: true,
+  },
+  secondaryButtonText: {
+    type: String,
+    required: false,
   },
 });
 
@@ -61,9 +66,14 @@ function onButtonClick() {
           行动号召按钮。
           - `@click` 指令将 `onButtonClick` 函数绑定到点击事件。
         -->
-        <button class="btn btn-primary" @click="onButtonClick">
-          {{ buttonText }}
-        </button>
+        <div class="flex justify-center gap-4">
+          <button v-if="secondaryButtonText" class="btn">
+            {{ secondaryButtonText }}
+          </button>
+          <button class="btn btn-primary" @click="onButtonClick">
+            {{ buttonText }}
+          </button>
+        </div>
       </div>
     </div>
   </div>

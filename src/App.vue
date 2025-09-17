@@ -23,7 +23,8 @@ const navLinks = ref([
   -->
   <Header :links="navLinks" brand="CurioCloud" brandHref="/" />
   <Hero
-      buttonText="Get Started"
+      buttonText="开始使用"
+      secondaryButtonText="了解更多"
       subtitle="更懂你的辅助备课系统"
       title="课研云"
   />
