@@ -2,16 +2,17 @@
   <!-- 抽屉布局容器 -->
   <div class="drawer fixed top-0 z-50 w-full">
     <!-- 抽屉切换复选框 (由 label 控制)，用于切换侧边栏的显示和隐藏 -->
-    <input id="my-drawer-3" type="checkbox" class="drawer-toggle" />
+    <input id="my-drawer-3" type="checkbox" class="drawer-toggle" v-model="isDrawerOpen" />
     <div class="drawer-content flex flex-col">
       <!-- 导航栏 -->
-      <div ref="navbarRef" class="navbar bg-base-300/60 w-full glass">
+      <div ref="navbarRef" class="navbar bg-base-300/90 w-full">
         <!-- 移动端汉堡菜单按钮 (仅在小屏幕显示) -->
         <div class="flex-none lg:hidden">
-          <label for="my-drawer-3" aria-label="open sidebar" class="btn btn-square btn-ghost">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block h-6 w-6 stroke-current">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
+          <label for="my-drawer-3" aria-label="open sidebar" class="btn btn-square btn-ghost swap swap-rotate" :class="{ 'swap-active': isDrawerOpen }">
+            <!-- Hamburger icon -->
+            <svg class="swap-off fill-current" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512"><path d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z"/></svg>
+            <!-- Close icon -->
+            <svg class="swap-on fill-current" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512"><polygon points="400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49"/></svg>
           </label>
         </div>
         <!-- 品牌 Logo/文本 -->
@@ -44,7 +45,7 @@
       <!-- 点击遮罩层可以关闭抽屉 -->
       <label for="my-drawer-3" aria-label="close sidebar" class="drawer-overlay"></label>
       <!-- 侧边栏菜单 -->
-      <ul class="menu bg-base-200 min-h-full w-80 p-4">
+      <ul class="menu bg-base-300/95 min-h-full w-60 p-4">
         <!-- 遍历导航链接 -->
         <li v-for="(item, i) in links" :key="`side-${i}`">
           <!-- 根据链接类型渲染 <router-link> 或 <a> -->
@@ -80,6 +81,8 @@ import { useRouter } from 'vue-router'
 const navbarRef = ref<HTMLElement | null>(null)
 // 创建一个 ref 来存储导航栏的高度
 const navbarHeight = ref(0)
+// 创建一个 ref 来跟踪抽屉的打开状态
+const isDrawerOpen = ref(false)
 
 // 在组件挂载后执行
 onMounted(() => {
