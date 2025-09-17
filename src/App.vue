@@ -11,9 +11,9 @@ import Footer from './components/Footer.vue'
 import { ref } from 'vue'
 
 const navLinks = ref([
-  { label: 'Home', href: '/' },
-  { label: 'About', href: '/about' },
-  { label: 'Docs', href: 'https://example.com/docs' }
+  { label: '主页', href: '/' },
+  { label: '关于', href: '/about' },
+  { label: '文档', href: 'https://example.com/docs' }
 ])
 </script>
 
@@ -28,6 +28,7 @@ const navLinks = ref([
     secondaryButtonText="了解更多"
     subtitle="更懂你的辅助备课系统"
     title="课研云"
+    backgroundImage="url(https://cdn.pixabay.com/photo/2017/09/11/15/58/sunset-2739472_1280.jpg)"
   />
   <Footer brand="CurioCloud" svgSrc="../public/logo.svg" />
 </template>

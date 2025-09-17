@@ -1,11 +1,11 @@
 <template>
   <!-- 抽屉布局容器 -->
-  <div class="drawer">
+  <div class="drawer fixed top-0 z-50 w-full">
     <!-- 抽屉切换复选框 (由 label 控制)，用于切换侧边栏的显示和隐藏 -->
     <input id="my-drawer-3" type="checkbox" class="drawer-toggle" />
     <div class="drawer-content flex flex-col">
       <!-- 导航栏 -->
-      <div class="navbar bg-base-300 w-full">
+      <div ref="navbarRef" class="navbar bg-base-300/60 w-full glass">
         <!-- 移动端汉堡菜单按钮 (仅在小屏幕显示) -->
         <div class="flex-none lg:hidden">
           <label for="my-drawer-3" aria-label="open sidebar" class="btn btn-square btn-ghost">
@@ -15,7 +15,7 @@
           </label>
         </div>
         <!-- 品牌 Logo/文本 -->
-        <div class="mx-2 flex-1 px-2">
+        <div class="mx-2 px-2">
           <!-- 根据链接是内部路由还是外部链接，动态渲染为 <router-link> 或 <a> 标签 -->
           <router-link v-if="brandHrefInternal" :to="brandHref" class="font-bold">{{ brandText }}</router-link>
           <a v-else :href="brandHref" class="font-bold">{{ brandText }}</a>
@@ -31,10 +31,16 @@
             </li>
           </ul>
         </div>
+        <div class="flex-1"></div>
+        <!-- 登录与注册按钮 -->
+        <div class="hidden flex-none items-center lg:flex">
+          <router-link to="/login" class="btn">登录</router-link>
+          <router-link to="/register" class="btn btn-primary ml-2">注册</router-link>
+        </div>
       </div>
     </div>
     <!-- 抽屉侧边栏 -->
-    <div class="drawer-side">
+    <div class="drawer-side" :style="{ marginTop: navbarHeight > 0 ? `${navbarHeight}px` : undefined }">
       <!-- 点击遮罩层可以关闭抽屉 -->
       <label for="my-drawer-3" aria-label="close sidebar" class="drawer-overlay"></label>
       <!-- 侧边栏菜单 -->
@@ -44,6 +50,13 @@
           <!-- 根据链接类型渲染 <router-link> 或 <a> -->
           <router-link v-if="isInternal(item.href)" :to="item.href">{{ item.label }}</router-link>
           <a v-else :href="item.href">{{ item.label }}</a>
+        </li>
+        <!-- 移动端登录注册链接 -->
+        <li>
+          <router-link to="/login">登录</router-link>
+        </li>
+        <li>
+          <router-link to="/register">注册</router-link>
         </li>
       </ul>
     </div>
@@ -60,15 +73,36 @@
  */
 
 // 使用 Composition API 定义组件逻辑，接收 links 和 brand 相关 props
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-/**
- * @description 定义导航链接的类型
- * @property {string} label - 链接显示的文本
- * @property {string} href - 链接的 URL
- */
-type LinkItem = { label: string; href: string }
+// 创建一个 ref 来引用导航栏元素
+const navbarRef = ref<HTMLElement | null>(null)
+// 创建一个 ref 来存储导航栏的高度
+const navbarHeight = ref(0)
+
+// 在组件挂载后执行
+onMounted(() => {
+  // 定义一个 ResizeObserver 来观察导航栏尺寸变化
+  const resizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      // 更新导航栏高度
+      navbarHeight.value = entry.target.clientHeight
+    }
+  })
+
+  // 如果导航栏元素存在，则开始观察
+  if (navbarRef.value) {
+    resizeObserver.observe(navbarRef.value)
+  }
+
+  // 在组件卸载时停止观察，以防止内存泄漏
+  onUnmounted(() => {
+    if (navbarRef.value) {
+      resizeObserver.unobserve(navbarRef.value)
+    }
+  })
+})
 
 // 定义组件接收的 props
 const props = defineProps<{
@@ -91,6 +125,13 @@ const props = defineProps<{
    */
   brandHref?: string
 }>()
+
+/**
+ * @description 定义导航链接的类型
+ * @property {string} label - 链接显示的文本
+ * @property {string} href - 链接的 URL
+ */
+type LinkItem = { label: string; href: string }
 
 /**
  * @description 导航链接数组，如果 props.links 未提供，则默认为空数组。

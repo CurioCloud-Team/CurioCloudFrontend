@@ -10,6 +10,7 @@
  * @property {string} subtitle - Hero 部分的副标题或描述性文本。
  * @property {string} buttonText - 行动号召按钮上显示的文本。
  * @property {string} [secondaryButtonText] - 次要行动号召按钮上显示的文本（可选）。
+ * @property {string} [backgroundImage] - Hero 组件的背景图片 URL。
  */
 defineProps({
   title: {
@@ -27,6 +28,11 @@ defineProps({
   secondaryButtonText: {
     type: String,
     required: false,
+  },
+  backgroundImage: {
+    type: String,
+    required: false,
+    default: 'url(https://img.daisyui.com/images/stock/photo-1507358522600-9f71e620c44e.webp)',
   },
 });
 
@@ -47,9 +53,7 @@ function onButtonClick() {
   -->
   <div
       class="hero min-h-screen"
-      style="
-      background-image: url(https://img.daisyui.com/images/stock/photo-1507358522600-9f71e620c44e.webp);
-    "
+      :style="{ 'background-image': backgroundImage }"
   >
     <!-- 背景图像上的叠加层，以提高文本的可读性 -->
     <div class="hero-overlay"></div>
