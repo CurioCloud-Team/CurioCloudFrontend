@@ -5,7 +5,7 @@
       <div class="flex items-center gap-4 mb-3">
         <button 
           @click="goToLogin" 
-          class="btn btn-ghost btn-circle"
+          class="btn btn-soft btn-circle"
           aria-label="返回登录"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
