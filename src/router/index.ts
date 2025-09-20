@@ -1,10 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AuthLayout from '../layouts/AuthLayout.vue'
+import DashboardLayout from '../layouts/DashboardLayout.vue'
 import LoginPage from '../views/LoginPage.vue'
 import RegisterPage from '../views/RegisterPage.vue'
 import LoginSuccessPage from '../views/LoginSuccessPage.vue'
 import RegisterSuccessPage from '../views/RegisterSuccessPage.vue'
 import ForgotPasswordPage from '../views/ForgotPasswordPage.vue'
+import DashboardHome from '../views/DashboardHome.vue'
+import TeachingDesign from '../views/TeachingDesign.vue'
+import TeachingResources from '../views/TeachingResources.vue'
+import ExerciseAssistant from '../views/ExerciseAssistant.vue'
+import LearningAnalysis from '../views/LearningAnalysis.vue'
 
 const routes = [
   {
@@ -43,6 +49,41 @@ const routes = [
       {
         path: '',
         redirect: '/auth/login'
+      }
+    ]
+  },
+  {
+    path: '/dashboard',
+    component: DashboardLayout,
+    children: [
+      {
+        path: 'home',
+        name: 'DashboardHome',
+        component: DashboardHome
+      },
+      {
+        path: 'teaching-design',
+        name: 'TeachingDesign',
+        component: TeachingDesign
+      },
+      {
+        path: 'teaching-resources',
+        name: 'TeachingResources',
+        component: TeachingResources
+      },
+      {
+        path: 'exercise-assistant',
+        name: 'ExerciseAssistant',
+        component: ExerciseAssistant
+      },
+      {
+        path: 'learning-analysis',
+        name: 'LearningAnalysis',
+        component: LearningAnalysis
+      },
+      {
+        path: '',
+        redirect: '/dashboard/home'
       }
     ]
   }

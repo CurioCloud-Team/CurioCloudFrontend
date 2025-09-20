@@ -42,12 +42,16 @@ onMounted(() => {
 
     // 设置登录时间
     loginTime.value = new Date().toLocaleString('zh-CN')
+
+    // 5秒后自动跳转到仪表盘
+    setTimeout(() => {
+        router.push('/dashboard/home')
+    }, 5000)
 })
 
 const goToDashboard = () => {
-    // TODO: 跳转到主控制台
-    console.log('跳转到控制台')
-    // router.push('/dashboard')
+    // 跳转到仪表盘
+    router.push('/dashboard/home')
 }
 
 const goToProfile = () => {
