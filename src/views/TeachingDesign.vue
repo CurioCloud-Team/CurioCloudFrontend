@@ -4,158 +4,159 @@
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold text-base-content">教学设计</h1>
-        <p class="text-base-content/60 mt-1">创建和管理您的教学设计方案</p>
+        <p class="text-base-content/60 mt-1">创建和管理您的教学大纲</p>
       </div>
-      <button class="btn btn-primary">
+      <button class="btn btn-primary" @click="createNewOutline">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>
-        新建设计
+        新建教案
       </button>
     </div>
 
-    <!-- Quick stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="stat bg-base-100 shadow-md rounded-lg">
-        <div class="stat-figure text-primary">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-          </svg>
+    <!-- Search and filters -->
+    <div class="card bg-base-100">
+      <div>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <!-- Search input -->
+          <div class="flex-1">
+            <div class="form-control">
+              <div class="input-group flex gap-2">
+                <input 
+                  type="text" 
+                  placeholder="搜索教学大纲..." 
+                  class="input input-bordered flex-1"
+                  v-model="searchQuery"
+                  @input="handleSearch"
+                />
+                <button class="btn btn-square" @click="handleSearch">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Filters -->
+          <div class="flex gap-2">
+            <select class="select select-bordered" v-model="selectedSubject" @change="handleFilter">
+              <option value="">全部学科</option>
+              <option value="数学">数学</option>
+              <option value="语文">语文</option>
+              <option value="英语">英语</option>
+              <option value="科学">科学</option>
+            </select>
+            <select class="select select-bordered" v-model="sortBy" @change="handleSort">
+              <option value="latest">最新创建</option>
+              <option value="modified">最近修改</option>
+              <option value="name">按名称排序</option>
+            </select>
+          </div>
         </div>
-        <div class="stat-title">总设计数</div>
-        <div class="stat-value text-primary">--</div>
-        <div class="stat-desc">数据加载中...</div>
-      </div>
-
-      <div class="stat bg-base-100 shadow-md rounded-lg">
-        <div class="stat-figure text-secondary">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-        </div>
-        <div class="stat-title">已完成</div>
-        <div class="stat-value text-secondary">--</div>
-        <div class="stat-desc">数据加载中...</div>
-      </div>
-
-      <div class="stat bg-base-100 shadow-md rounded-lg">
-        <div class="stat-figure text-accent">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-          </svg>
-        </div>
-        <div class="stat-title">进行中</div>
-        <div class="stat-value text-accent">--</div>
-        <div class="stat-desc">数据加载中...</div>
       </div>
     </div>
 
-    <!-- Main content -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Left column -->
-      <div class="lg:col-span-2 space-y-6">
-        <!-- Recent designs -->
-        <div class="card bg-base-100 shadow-md">
-          <div class="card-body">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="card-title">最近的设计</h2>
-              <button class="btn btn-ghost btn-sm">查看全部</button>
-            </div>
-            <div class="text-base-content/60">
-              <p>暂无教学设计记录</p>
-            </div>
-          </div>
+    <!-- Teaching outline list -->
+    <div class="card bg-base-100">
+      <div>
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="card-title">
+            教学大纲列表
+            <span class="text-sm font-normal text-base-content/60" v-if="filteredOutlinesCount">
+              ({{ filteredOutlinesCount }} 个结果)
+            </span>
+          </h2>
+          <button class="btn btn-ghost btn-sm" @click="clearFilters" v-if="hasActiveFilters">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            清除筛选
+          </button>
         </div>
 
-        <!-- Design templates -->
-        <div class="card bg-base-100 shadow-md">
-          <div class="card-body">
-            <h2 class="card-title mb-4">设计模板</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="border border-base-300 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+        <!-- Outline items container with infinite scroll -->
+        <div 
+          ref="scrollContainer"
+          class="space-y-4 max-h-[600px] overflow-y-auto pr-2"
+          @scroll="handleScroll"
+        >
+          <div 
+            v-for="outline in displayedOutlines" 
+            :key="outline.id"
+            class="border border-base-300 rounded-lg p-4 hover:shadow-md transition-shadow"
+          >
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
                 <div class="flex items-center gap-3 mb-2">
-                  <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                    </svg>
+                  <h3 class="font-semibold text-lg">{{ outline.title }}</h3>
+                  <div class="badge badge-sm" :class="getSubjectBadgeClass(outline.subject)">
+                    {{ outline.subject }}
                   </div>
-                  <h3 class="font-semibold">传统课堂模板</h3>
+                  <div class="badge badge-outline badge-sm">{{ outline.grade }}</div>
                 </div>
-                <p class="text-sm text-base-content/60">适用于常规课堂教学的设计模板</p>
+                <p class="text-sm text-base-content/70 mb-3">
+                  {{ outline.description }}
+                </p>
+                <div class="flex items-center gap-4 text-xs text-base-content/60">
+                  <span>创建时间：{{ outline.createTime }}</span>
+                  <span>最后修改：{{ outline.modifyTime }}</span>
+                  <span>课时：{{ outline.duration }}</span>
+                </div>
               </div>
-              
-              <div class="border border-base-300 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
-                <div class="flex items-center gap-3 mb-2">
-                  <div class="w-8 h-8 bg-secondary/10 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              <div class="flex gap-2 ml-4">
+                <button class="btn btn-ghost btn-sm" @click="previewOutline(outline)">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                  预览
+                </button>
+                <button class="btn btn-ghost btn-sm" @click="editOutline(outline)">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                  编辑
+                </button>
+                <div class="dropdown dropdown-end">
+                  <label tabindex="0" class="btn btn-ghost btn-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
                     </svg>
-                  </div>
-                  <h3 class="font-semibold">混合式教学模板</h3>
+                  </label>
+                  <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-32">
+                    <li><a @click="copyOutline(outline)">复制</a></li>
+                    <li><a @click="shareOutline(outline)">分享</a></li>
+                    <li><a @click="deleteOutline(outline)" class="text-error">删除</a></li>
+                  </ul>
                 </div>
-                <p class="text-sm text-base-content/60">线上线下结合的教学设计模板</p>
               </div>
             </div>
+          </div>
+
+          <!-- Loading indicator -->
+          <div v-if="isLoading" class="flex justify-center py-4">
+            <span class="loading loading-spinner loading-md"></span>
+            <span class="ml-2 text-sm text-base-content/60">加载中...</span>
+          </div>
+
+          <!-- No more data indicator -->
+          <div v-if="!hasMoreData && displayedOutlines.length > 0" class="text-center py-4 text-sm text-base-content/60">
+            没有更多数据了
           </div>
         </div>
-      </div>
 
-      <!-- Right column -->
-      <div class="space-y-6">
-        <!-- Quick actions -->
-        <div class="card bg-base-100 shadow-md">
-          <div class="card-body">
-            <h2 class="card-title mb-4">快捷操作</h2>
-            <div class="space-y-3">
-              <button class="btn btn-outline btn-block justify-start">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                创建新设计
-              </button>
-              <button class="btn btn-outline btn-block justify-start">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
-                </svg>
-                导入设计
-              </button>
-              <button class="btn btn-outline btn-block justify-start">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
-                </svg>
-                分享设计
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Categories -->
-        <div class="card bg-base-100 shadow-md">
-          <div class="card-body">
-            <h2 class="card-title mb-4">设计分类</h2>
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <span>语文</span>
-                <div class="badge badge-outline">--</div>
-              </div>
-              <div class="flex items-center justify-between">
-                <span>数学</span>
-                <div class="badge badge-outline">--</div>
-              </div>
-              <div class="flex items-center justify-between">
-                <span>英语</span>
-                <div class="badge badge-outline">--</div>
-              </div>
-              <div class="flex items-center justify-between">
-                <span>科学</span>
-                <div class="badge badge-outline">--</div>
-              </div>
-              <div class="flex items-center justify-between">
-                <span>其他</span>
-                <div class="badge badge-outline">--</div>
-              </div>
-            </div>
-          </div>
+        <!-- Empty state -->
+        <div v-if="displayedOutlines.length === 0 && !isLoading" class="text-center text-base-content/60 py-12">
+          <svg class="w-16 h-16 mx-auto mb-4 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+          </svg>
+          <p class="text-lg mb-2">
+            {{ hasActiveFilters ? '未找到匹配的教学大纲' : '暂无教学大纲' }}
+          </p>
+          <p class="text-sm">
+            {{ hasActiveFilters ? '尝试调整搜索条件或筛选器' : '点击上方"新建教案"按钮开始创建您的第一个教学大纲' }}
+          </p>
         </div>
       </div>
     </div>
@@ -163,5 +164,253 @@
 </template>
 
 <script setup lang="ts">
-// 教学设计页面
+import { ref, computed, onMounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+// 教学大纲数据类型
+interface TeachingOutline {
+  id: number
+  title: string
+  subject: string
+  grade: string
+  description: string
+  createTime: string
+  modifyTime: string
+  duration: string
+}
+
+// 响应式数据
+const searchQuery = ref('')
+const selectedSubject = ref('')
+const sortBy = ref('latest')
+const displayedOutlines = ref<TeachingOutline[]>([])
+const isLoading = ref(false)
+const hasMoreData = ref(true)
+const scrollContainer = ref<HTMLElement>()
+
+// 模拟数据 - 实际项目中这些数据会从API获取
+const allOutlines = ref<TeachingOutline[]>([
+  {
+    id: 1,
+    title: '《分数的初步认识》教学大纲',
+    subject: '数学',
+    grade: '三年级',
+    description: '本节课通过实际操作和生活实例，让学生初步认识分数的含义，理解分数各部分的名称，能正确读写简单的分数。',
+    createTime: '2024-03-15',
+    modifyTime: '2024-03-18',
+    duration: '1课时'
+  },
+  {
+    id: 2,
+    title: '《春天的诗歌》教学大纲',
+    subject: '语文',
+    grade: '二年级',
+    description: '通过朗读春天主题的诗歌，培养学生的语感和审美能力，理解诗歌表达的情感，学会有感情地朗读诗歌。',
+    createTime: '2024-03-12',
+    modifyTime: '2024-03-16',
+    duration: '2课时'
+  },
+  {
+    id: 3,
+    title: '《Plants and Animals》教学大纲',
+    subject: '英语',
+    grade: '四年级',
+    description: '学习动植物相关词汇，掌握基本的描述性语句，能够用英语简单描述动植物的特征和习性。',
+    createTime: '2024-03-10',
+    modifyTime: '2024-03-14',
+    duration: '3课时'
+  },
+  // 添加更多示例数据用于测试无限滚动
+  {
+    id: 4,
+    title: '《小数的加减法》教学大纲',
+    subject: '数学',
+    grade: '四年级',
+    description: '掌握小数加减法的计算方法，能够正确进行小数的加减运算，解决实际问题。',
+    createTime: '2024-03-08',
+    modifyTime: '2024-03-12',
+    duration: '2课时'
+  },
+  {
+    id: 5,
+    title: '《我的家乡》教学大纲',
+    subject: '语文',
+    grade: '三年级',
+    description: '通过描写家乡的美景，培养学生的观察能力和表达能力，增强对家乡的热爱之情。',
+    createTime: '2024-03-05',
+    modifyTime: '2024-03-10',
+    duration: '1课时'
+  },
+  {
+    id: 6,
+    title: '《Weather and Seasons》教学大纲',
+    subject: '英语',
+    grade: '三年级',
+    description: '学习天气和季节相关词汇，能够用英语描述不同的天气情况和季节特点。',
+    createTime: '2024-03-02',
+    modifyTime: '2024-03-08',
+    duration: '2课时'
+  }
+])
+
+// 计算属性
+const filteredOutlines = computed(() => {
+  let filtered = [...allOutlines.value]
+  
+  // 按搜索关键词过滤
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter(outline => 
+      outline.title.toLowerCase().includes(query) ||
+      outline.description.toLowerCase().includes(query) ||
+      outline.subject.toLowerCase().includes(query) ||
+      outline.grade.toLowerCase().includes(query)
+    )
+  }
+  
+  // 按学科过滤
+  if (selectedSubject.value) {
+    filtered = filtered.filter(outline => outline.subject === selectedSubject.value)
+  }
+  
+  // 排序
+  filtered.sort((a, b) => {
+    switch (sortBy.value) {
+      case 'latest':
+        return new Date(b.createTime).getTime() - new Date(a.createTime).getTime()
+      case 'modified':
+        return new Date(b.modifyTime).getTime() - new Date(a.modifyTime).getTime()
+      case 'name':
+        return a.title.localeCompare(b.title)
+      default:
+        return 0
+    }
+  })
+  
+  return filtered
+})
+
+const filteredOutlinesCount = computed(() => filteredOutlines.value.length)
+
+const hasActiveFilters = computed(() => {
+  return searchQuery.value.trim() !== '' || selectedSubject.value !== ''
+})
+
+// 分页参数
+const pageSize = 10
+let currentPage = 0
+
+// 方法
+const loadMoreData = async () => {
+  if (isLoading.value || !hasMoreData.value) return
+  
+  isLoading.value = true
+  
+  // 模拟API延迟
+  await new Promise(resolve => setTimeout(resolve, 500))
+  
+  const startIndex = currentPage * pageSize
+  const endIndex = startIndex + pageSize
+  const newItems = filteredOutlines.value.slice(startIndex, endIndex)
+  
+  if (newItems.length > 0) {
+    displayedOutlines.value.push(...newItems)
+    currentPage++
+  }
+  
+  if (endIndex >= filteredOutlines.value.length) {
+    hasMoreData.value = false
+  }
+  
+  isLoading.value = false
+}
+
+const resetList = () => {
+  displayedOutlines.value = []
+  currentPage = 0
+  hasMoreData.value = true
+}
+
+const handleSearch = () => {
+  resetList()
+  nextTick(() => {
+    loadMoreData()
+  })
+}
+
+const handleFilter = () => {
+  resetList()
+  nextTick(() => {
+    loadMoreData()
+  })
+}
+
+const handleSort = () => {
+  resetList()
+  nextTick(() => {
+    loadMoreData()
+  })
+}
+
+const handleScroll = (event: Event) => {
+  const target = event.target as HTMLElement
+  const { scrollTop, scrollHeight, clientHeight } = target
+  
+  // 当滚动到底部附近时加载更多数据
+  if (scrollHeight - scrollTop - clientHeight < 100) {
+    loadMoreData()
+  }
+}
+
+const clearFilters = () => {
+  searchQuery.value = ''
+  selectedSubject.value = ''
+  resetList()
+  nextTick(() => {
+    loadMoreData()
+  })
+}
+
+const getSubjectBadgeClass = (subject: string) => {
+  const classMap: Record<string, string> = {
+    '数学': 'badge-primary',
+    '语文': 'badge-secondary',
+    '英语': 'badge-accent',
+    '科学': 'badge-info'
+  }
+  return classMap[subject] || 'badge-neutral'
+}
+
+// 操作方法
+const createNewOutline = () => {
+  router.push('/dashboard/teaching-design/start')
+}
+
+const previewOutline = (outline: TeachingOutline) => {
+  console.log('预览教案:', outline)
+}
+
+const editOutline = (outline: TeachingOutline) => {
+  console.log('编辑教案:', outline)
+}
+
+const copyOutline = (outline: TeachingOutline) => {
+  console.log('复制教案:', outline)
+}
+
+const shareOutline = (outline: TeachingOutline) => {
+  console.log('分享教案:', outline)
+}
+
+const deleteOutline = (outline: TeachingOutline) => {
+  console.log('删除教案:', outline)
+  // 实际项目中这里会显示确认对话框
+}
+
+// 生命周期
+onMounted(() => {
+  loadMoreData()
+})
 </script>

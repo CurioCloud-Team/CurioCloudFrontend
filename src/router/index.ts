@@ -8,6 +8,8 @@ import RegisterSuccessPage from '../views/RegisterSuccessPage.vue'
 import ForgotPasswordPage from '../views/ForgotPasswordPage.vue'
 import DashboardHome from '../views/DashboardHome.vue'
 import TeachingDesign from '../views/TeachingDesign.vue'
+import TeachingPlanStart from '../views/TeachingPlanStart.vue'
+import CreateTeachingPlan from '../views/CreateTeachingPlan.vue'
 import TeachingResources from '../views/TeachingResources.vue'
 import ExerciseAssistant from '../views/ExerciseAssistant.vue'
 import LearningAnalysis from '../views/LearningAnalysis.vue'
@@ -65,6 +67,16 @@ const routes = [
         path: 'teaching-design',
         name: 'TeachingDesign',
         component: TeachingDesign
+      },
+      {
+        path: 'teaching-design/start',
+        name: 'TeachingPlanStart',
+        component: TeachingPlanStart
+      },
+      {
+        path: 'teaching-design/create',
+        name: 'CreateTeachingPlan',
+        component: CreateTeachingPlan
       },
       {
         path: 'teaching-resources',
