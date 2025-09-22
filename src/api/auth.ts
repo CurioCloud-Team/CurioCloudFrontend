@@ -1,5 +1,5 @@
 import apiClient from './index';
-import type { UserLogin, AuthResponse } from '../types/auth';
+import type { UserLogin, AuthResponse, UserProfileResponse } from '../types/auth';
 import type { AxiosResponse } from 'axios';
 
 /**
@@ -8,4 +8,11 @@ import type { AxiosResponse } from 'axios';
  */
 export const loginAPI = (credentials: UserLogin): Promise<AxiosResponse<AuthResponse>> => {
   return apiClient.post('/auth/login', credentials);
+};
+
+/**
+ * 获取用户资料
+ */
+export const getUserProfileAPI = (): Promise<AxiosResponse<UserProfileResponse>> => {
+  return apiClient.get('/user/profile');
 };

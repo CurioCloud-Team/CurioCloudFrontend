@@ -27,3 +27,14 @@ export interface AuthResponse {
   token: Token;
   message: string;
 }
+
+export interface UserProfileResponse {
+  id: number;
+  username: string;
+  email: string;
+  full_name: string | null;
+  is_active: boolean;
+  is_verified: boolean;
+  created_at: string;
+  updated_at: string;
+}
