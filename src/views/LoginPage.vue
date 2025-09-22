@@ -49,13 +49,19 @@
     <div class="form-control mt-4">
       <button 
         type="submit" 
-        class="btn btn-soft w-full"
+        class="btn btn-primary w-full"
         :disabled="isLoading"
       >
         <span v-if="isLoading" class="loading loading-spinner"></span>
         <span v-if="!isLoading">登录</span>
         <span v-else>登录中...</span>
       </button>
+    </div>
+
+    <!-- Error Message -->
+    <div v-if="errorMessage" class="alert alert-error text-sm">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <span>{{ errorMessage }}</span>
     </div>
   </form>
 
@@ -89,35 +95,39 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { loginAPI } from '../api/auth'
 
 const router = useRouter()
 
 const loginForm = ref({
   username: '',
   password: '',
-  rememberMe: false
 })
 
 const isLoading = ref(false)
+const errorMessage = ref<string | null>(null)
 
 const handleLogin = async () => {
   isLoading.value = true
+  errorMessage.value = null
   console.log('登录信息:', loginForm.value)
   
   try {
-    // TODO: 实现实际的登录逻辑
-    // const response = await loginAPI(loginForm.value)
+    const { data } = await loginAPI(loginForm.value)
     
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // 存储 token
+    localStorage.setItem('accessToken', data.token.access_token)
     
     // 登录成功，跳转到成功页面
-    router.push('/auth/login-success')
+    await router.push('/auth/login-success')
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('登录失败:', error)
-    // TODO: 显示错误信息
-    alert('登录失败，请检查用户名和密码')
+    if (error.response && error.response.data && error.response.data.detail) {
+      errorMessage.value = error.response.data.detail
+    } else {
+      errorMessage.value = '登录失败，请检查您的网络或联系管理员'
+    }
   } finally {
     isLoading.value = false
   }
