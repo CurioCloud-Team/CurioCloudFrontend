@@ -21,7 +21,7 @@
             <!-- 成功状态 -->
             <div v-else-if="userInfo">
                 <h1 class="text-3xl font-bold text-gray-900 mb-2">注册成功！</h1>
-                <p class="text-gray-500">您的账户已创建完成</p>
+                <p class="text-gray-500">您的账户已创建完成，将在 3 秒后自动跳转到仪表盘</p>
             </div>
 
             <!-- 错误状态 -->
@@ -64,10 +64,16 @@
     <!-- 操作按钮 -->
     <div v-if="userInfo" class="space-y-4">
       <button 
+        @click="goToDashboard"
+        class="btn btn-primary w-full"
+      >
+        立即进入仪表盘
+      </button>
+      <button 
         @click="goToLogin"
         class="btn btn-outline w-full"
       >
-        前往登录
+        返回登录
       </button>
     </div>
 
@@ -101,6 +107,11 @@ onMounted(async () => {
 
     // 设置注册时间
     registrationTime.value = new Date().toLocaleString('zh-CN')
+
+    // 3秒后自动跳转到仪表盘
+    setTimeout(() => {
+      router.push('/dashboard/home')
+    }, 3000)
   } catch (error: any) {
     console.error('获取用户信息失败:', error)
     isLoading.value = false
@@ -121,6 +132,11 @@ const retry = async () => {
     const { data } = await getUserProfileAPI()
     userInfo.value = data
     registrationTime.value = new Date().toLocaleString('zh-CN')
+
+    // 3秒后自动跳转到仪表盘
+    setTimeout(() => {
+      router.push('/dashboard/home')
+    }, 3000)
   } catch (error: any) {
     console.error('获取用户信息失败:', error)
     if (error.response && error.response.data && error.response.data.detail) {
@@ -131,6 +147,10 @@ const retry = async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+const goToDashboard = () => {
+  router.push('/dashboard/home')
 }
 
 const goToLogin = () => {
