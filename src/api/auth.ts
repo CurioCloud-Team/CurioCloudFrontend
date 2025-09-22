@@ -1,6 +1,14 @@
 import apiClient from './index';
-import type { UserLogin, AuthResponse, UserProfileResponse } from '../types/auth';
+import type { UserLogin, UserCreate, AuthResponse, UserProfileResponse } from '../types/auth';
 import type { AxiosResponse } from 'axios';
+
+/**
+ * 用户注册
+ * @param userData - 用户注册信息
+ */
+export const registerAPI = (userData: UserCreate): Promise<AxiosResponse<AuthResponse>> => {
+  return apiClient.post('/auth/register', userData);
+};
 
 /**
  * 用户登录

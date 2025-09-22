@@ -124,6 +124,12 @@
             </button>
           </div>
 
+          <!-- Error Message -->
+          <div v-if="errorMessage" class="alert alert-error text-sm mt-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>{{ errorMessage }}</span>
+          </div>
+
         </form>
   </div>
 </template>
@@ -131,18 +137,22 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { registerAPI } from '../api/auth'
+import type { UserCreate } from '../types/auth'
 
 const router = useRouter()
 
-const registerForm = ref({
+const registerForm = ref<UserCreate & { confirmPassword: string; agreeTerms: boolean }>({
   username: '',
   email: '',
   password: '',
   confirmPassword: '',
+  confirm_password: '',
   agreeTerms: false
 })
 
 const isLoading = ref(false)
+const errorMessage = ref<string | null>(null)
 const errors = ref({
   username: '',
   email: '',
@@ -222,22 +232,33 @@ const handleRegister = async () => {
   }
   
   isLoading.value = true
+  errorMessage.value = null
   console.log('注册信息:', registerForm.value)
   
   try {
-    // TODO: 实现实际的注册逻辑
-    // const response = await registerAPI(registerForm.value)
+    // 准备注册数据
+    const registerData: UserCreate = {
+      username: registerForm.value.username,
+      email: registerForm.value.email,
+      password: registerForm.value.password,
+      confirm_password: registerForm.value.confirmPassword
+    }
     
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    const { data } = await registerAPI(registerData)
+    
+    // 存储 token
+    localStorage.setItem('accessToken', data.token.access_token)
     
     // 注册成功，跳转到成功页面
-    router.push('/auth/register-success')
+    await router.push('/auth/register-success')
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('注册失败:', error)
-    // TODO: 显示错误信息
-    alert('注册失败，请稍后重试')
+    if (error.response && error.response.data && error.response.data.detail) {
+      errorMessage.value = error.response.data.detail
+    } else {
+      errorMessage.value = '注册失败，请稍后重试'
+    }
   } finally {
     isLoading.value = false
   }

@@ -5,6 +5,14 @@ export interface UserLogin {
   password: string;
 }
 
+export interface UserCreate {
+  username: string;
+  email: string;
+  full_name?: string | null;
+  password: string;
+  confirm_password: string;
+}
+
 export interface UserResponse {
   id: number;
   username: string;

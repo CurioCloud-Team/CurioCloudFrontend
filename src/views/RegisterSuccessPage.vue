@@ -11,27 +11,58 @@
                     </g>
                 </svg>
             </div>
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">注册成功！</h1>
-      <p class="text-gray-500">您的账户已创建完成</p>
+
+            <!-- 加载状态 -->
+            <div v-if="isLoading" class="text-center">
+                <div class="loading loading-spinner loading-lg mb-4"></div>
+                <p class="text-gray-500">正在获取账户信息...</p>
+            </div>
+
+            <!-- 成功状态 -->
+            <div v-else-if="userInfo">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">注册成功！</h1>
+                <p class="text-gray-500">您的账户已创建完成</p>
+            </div>
+
+            <!-- 错误状态 -->
+            <div v-else-if="errorMessage" class="text-center">
+                <h1 class="text-3xl font-bold text-red-600 mb-2">获取账户信息失败</h1>
+                <p class="text-gray-500 mb-4">{{ errorMessage }}</p>
+                <button @click="retry" class="btn btn-primary">
+                    重试
+                </button>
+            </div>
     </div>
 
     <!-- 注册信息确认 -->
-    <div class="bg-gray-50 rounded-xl p-6 mb-6">
+    <!-- <div v-if="userInfo" class="bg-gray-50 rounded-xl p-6 mb-6">
       <h3 class="text-lg font-semibold text-gray-900 mb-4">账户详情</h3>
       <div class="space-y-3">
         <div class="flex justify-between">
           <span class="text-gray-600">用户名</span>
-          <span class="font-medium">{{ registrationInfo.username || 'new_user' }}</span>
+          <span class="font-medium">{{ userInfo.username }}</span>
         </div>
         <div class="flex justify-between">
           <span class="text-gray-600">邮箱</span>
-          <span class="font-medium">{{ registrationInfo.email || 'user@example.com' }}</span>
+          <span class="font-medium">{{ userInfo.email }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">姓名</span>
+          <span class="font-medium">{{ userInfo.full_name || '未设置' }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">状态</span>
+          <span class="font-medium">{{ userInfo.is_active ? '活跃' : '未激活' }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">注册时间</span>
+          <span class="font-medium">{{ registrationTime }}</span>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- 操作按钮 -->
-    <div class="space-y-4">
+    <div v-if="userInfo" class="space-y-4">
       <button 
         @click="goToLogin"
         class="btn btn-outline w-full"
@@ -46,77 +77,63 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getUserProfileAPI } from '../api/auth'
+import type { UserProfileResponse } from '../types/auth'
 
 const router = useRouter()
 
-// 注册信息（实际使用时从注册表单传递）
-const registrationInfo = ref({
-  username: '',
-  email: ''
-})
+// 用户信息
+const userInfo = ref<UserProfileResponse | null>(null)
+
+// 加载状态
+const isLoading = ref(true)
+
+// 错误信息
+const errorMessage = ref<string | null>(null)
 
 // 注册时间
 const registrationTime = ref('')
 
-// 重发验证邮件相关
-const isResending = ref(false)
-const countdown = ref(0)
+onMounted(async () => {
+  try {
+    const { data } = await getUserProfileAPI()
+    userInfo.value = data
 
-onMounted(() => {
-  // 模拟从注册表单获取信息
-  // 实际实现时可以通过路由参数或状态管理获取
-  registrationInfo.value = {
-    username: 'new_user',
-    email: 'user@example.com'
+    // 设置注册时间
+    registrationTime.value = new Date().toLocaleString('zh-CN')
+  } catch (error: any) {
+    console.error('获取用户信息失败:', error)
+    isLoading.value = false
+    if (error.response && error.response.data && error.response.data.detail) {
+      errorMessage.value = error.response.data.detail
+    } else {
+      errorMessage.value = '获取用户信息失败，请稍后重试'
+    }
+  } finally {
+    isLoading.value = false
   }
-  
-  // 设置注册时间
-  registrationTime.value = new Date().toLocaleString('zh-CN')
 })
 
-const resendVerification = async () => {
-  if (isResending.value || countdown.value > 0) return
-  
-  isResending.value = true
-  
+const retry = async () => {
+  isLoading.value = true
+  errorMessage.value = null
   try {
-    // TODO: 调用重发验证邮件API
-    console.log('重发验证邮件到:', registrationInfo.value.email)
-    
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // 开始倒计时
-    startCountdown()
-    
-    // 显示成功消息
-    alert('验证邮件已重新发送，请检查您的邮箱')
-    
-  } catch (error) {
-    console.error('重发验证邮件失败:', error)
-    alert('发送失败，请稍后重试')
-  } finally {
-    isResending.value = false
-  }
-}
-
-const startCountdown = () => {
-  countdown.value = 60
-  const timer = setInterval(() => {
-    countdown.value--
-    if (countdown.value <= 0) {
-      clearInterval(timer)
+    const { data } = await getUserProfileAPI()
+    userInfo.value = data
+    registrationTime.value = new Date().toLocaleString('zh-CN')
+  } catch (error: any) {
+    console.error('获取用户信息失败:', error)
+    if (error.response && error.response.data && error.response.data.detail) {
+      errorMessage.value = error.response.data.detail
+    } else {
+      errorMessage.value = '获取用户信息失败，请稍后重试'
     }
-  }, 1000)
+  } finally {
+    isLoading.value = false
+  }
 }
 
 const goToLogin = () => {
   router.push('/auth/login')
-}
-
-const contactSupport = () => {
-  // TODO: 打开客服聊天或跳转到帮助页面
-  console.log('联系客服')
-  // window.open('mailto:support@curiocloud.com')
 }
 </script>
