@@ -13,6 +13,7 @@ import TeachingPlanStart from '../views/TeachingPlanStart.vue'
 import CreateTeachingPlan from '../views/CreateTeachingPlan.vue'
 import TeachingResources from '../views/TeachingResources.vue'
 import ExerciseAssistant from '../views/ExerciseAssistant.vue'
+import ExerciseGenerationResult from '../views/ExerciseGenerationResult.vue'
 import LearningAnalysis from '../views/LearningAnalysis.vue'
 
 const routes = [
@@ -93,6 +94,11 @@ const routes = [
         path: 'exercise-assistant',
         name: 'ExerciseAssistant',
         component: ExerciseAssistant
+      },
+      {
+        path: 'exercise-assistant/result',
+        name: 'ExerciseGenerationResult',
+        component: ExerciseGenerationResult
       },
       {
         path: 'learning-analysis',

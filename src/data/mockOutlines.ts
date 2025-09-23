@@ -301,6 +301,108 @@ export const mockOutlineDetails: Record<number, TeachingOutlineDetail> = {
         content: '建议增加更多的互动环节，让学生更好地参与。'
       }
     ]
+  },
+  18: {
+    id: 18,
+    title: 'GoLang入门教程教学大纲',
+    subject: '计算机科学',
+    grade: '大学一年级',
+    description: '面向有其他编程语言基础的学生，通过理论讲解和实践操作相结合的方式，帮助学生快速掌握GoLang基础语法、数据结构和包管理机制。',
+    createTime: '2024-09-20',
+    modifyTime: '2024-09-22',
+    duration: '3课时',
+    author: '赵老师',
+    status: '已发布',
+    objectives: [
+      '掌握GoLang的基本语法和数据类型',
+      '理解GoLang的控制流结构（if/else，for循环）',
+      '掌握GoLang中常用的数据结构（数组、切片、映射）',
+      '理解GoLang的包管理机制，能够引入和使用标准库',
+      '能够独立运用GoLang编写简单的数据处理脚本或命令行工具'
+    ],
+    contents: [
+      {
+        title: 'GoLang语言特性和基础语法',
+        description: '介绍GoLang的语言特性、基本语法规则和开发环境配置。',
+        keyPoints: ['变量声明', '数据类型', '函数定义', '包导入']
+      },
+      {
+        title: '控制流和数据结构',
+        description: '学习GoLang的条件语句、循环语句以及常用数据结构的使用方法。',
+        keyPoints: ['if/else语句', 'for循环', '数组和切片', '映射Map']
+      },
+      {
+        title: '包管理和实践项目',
+        description: '掌握GoLang的包管理机制，通过实际项目练习巩固所学知识。',
+        keyPoints: ['包的导入和使用', '标准库', '项目实践', '代码规范']
+      }
+    ],
+    process: [
+      {
+        title: '理论讲解',
+        duration: '90分钟',
+        description: 'GoLang基础概念和语法讲解，占课程50%时间。',
+        activities: [
+          '语言特性介绍',
+          '语法规则讲解',
+          '示例代码演示',
+          '与其他语言对比'
+        ]
+      },
+      {
+        title: '实践操作',
+        duration: '90分钟',
+        description: '互动式编程练习和项目实战，占课程50%时间。',
+        activities: [
+          '环境配置练习',
+          '基础语法练习',
+          '数据结构操作',
+          '简单项目开发'
+        ]
+      }
+    ],
+    assessments: [
+      {
+        type: '编程练习',
+        description: '完成课堂布置的编程练习题',
+        weight: '40%'
+      },
+      {
+        type: '项目实践',
+        description: '独立完成一个简单的命令行工具',
+        weight: '35%'
+      },
+      {
+        type: '理论测试',
+        description: '基础语法和概念理解测试',
+        weight: '25%'
+      }
+    ],
+    totalHours: '180分钟',
+    knowledgePoints: 12,
+    activitiesCount: 8,
+    difficulty: 4,
+    resources: [
+      { id: 1, name: 'GoLang官方教程', type: 'PDF' },
+      { id: 2, name: '开发环境配置指南', type: 'PDF' },
+      { id: 3, name: '练习代码示例', type: '代码' },
+      { id: 4, name: '项目模板', type: '压缩包' }
+    ],
+    tags: ['GoLang', '编程语言', '后端开发', '命令行工具'],
+    comments: [
+      {
+        id: 1,
+        author: '陈老师',
+        time: '2024-09-23',
+        content: '课程设计很实用，理论和实践结合得很好。'
+      },
+      {
+        id: 2,
+        author: '孙老师',
+        time: '2024-09-22',
+        content: '建议增加更多的实际项目案例。'
+      }
+    ]
   }
 }
 

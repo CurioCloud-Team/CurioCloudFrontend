@@ -6,7 +6,7 @@
         <h1 class="text-2xl font-bold text-base-content">习题助手</h1>
         <p class="text-base-content/60 mt-1">智能生成和管理习题，提升教学效率</p>
       </div>
-      <button class="btn btn-primary">
+      <button class="btn btn-primary" @click="showOutlineModal = true">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
         </svg>
@@ -34,7 +34,7 @@
             基于教学内容和难度要求，智能生成各类型习题，支持选择题、填空题、问答题等。
           </p>
           <div class="card-actions">
-            <button class="btn btn-primary btn-sm">开始生成</button>
+            <button class="btn btn-primary btn-sm" @click="showOutlineModal = true">开始生成</button>
           </div>
         </div>
       </div>
@@ -63,9 +63,107 @@
         </div>
       </div>
     </div>
+
+    <!-- 教学大纲选择弹层 -->
+    <div v-if="showOutlineModal" class="modal modal-open">
+      <div class="modal-box max-w-2xl">
+        <h3 class="font-bold text-lg mb-4">选择教学大纲</h3>
+        <p class="text-base-content/60 mb-6">请选择要生成习题的教学大纲</p>
+        
+        <!-- 大纲列表 -->
+        <div class="space-y-3 max-h-96 overflow-y-auto">
+          <div 
+            v-for="outline in outlines" 
+            :key="outline.id"
+            class="card bg-base-200 hover:bg-base-300 cursor-pointer transition-colors"
+            :class="{ 'ring-2 ring-primary': selectedOutlineId === outline.id }"
+            @click="selectedOutlineId = outline.id"
+          >
+            <div class="card-body p-4">
+              <div class="flex items-center justify-between">
+                <div class="flex-1">
+                  <h4 class="font-semibold text-base">{{ outline.title }}</h4>
+                  <div class="flex items-center gap-4 mt-2 text-sm text-base-content/60">
+                    <span class="badge badge-outline">{{ outline.subject }}</span>
+                    <span>{{ outline.grade }}</span>
+                    <span>{{ outline.duration }}</span>
+                  </div>
+                  <p class="text-sm text-base-content/70 mt-2 line-clamp-2">{{ outline.description }}</p>
+                </div>
+                <div v-if="selectedOutlineId === outline.id" class="text-primary">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-action">
+          <button class="btn" @click="closeModal">取消</button>
+          <button 
+            class="btn btn-primary" 
+            :disabled="!selectedOutlineId || isGenerating"
+            @click="generateExercises"
+          >
+            <span v-if="isGenerating" class="loading loading-spinner loading-sm mr-2"></span>
+            {{ isGenerating ? '生成中...' : '开始生成' }}
+          </button>
+        </div>
+      </div>
+      <div class="modal-backdrop" @click="closeModal"></div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// 习题助手页面
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { mockOutlineDetails, type TeachingOutlineDetail } from '../data/mockOutlines'
+
+// 路由
+const router = useRouter()
+
+// 响应式数据
+const showOutlineModal = ref(false)
+const selectedOutlineId = ref<number | null>(null)
+const isGenerating = ref(false)
+const outlines = ref<TeachingOutlineDetail[]>([])
+
+// 获取大纲列表
+const loadOutlines = () => {
+  // 从模拟数据中获取大纲列表
+  outlines.value = Object.values(mockOutlineDetails)
+}
+
+// 关闭弹层
+const closeModal = () => {
+  showOutlineModal.value = false
+  selectedOutlineId.value = null
+}
+
+// 生成习题
+const generateExercises = async () => {
+  if (!selectedOutlineId.value) return
+  
+  isGenerating.value = true
+  
+  // 模拟API调用延迟
+  await new Promise(resolve => setTimeout(resolve, 2000))
+  
+  // 跳转到生成结果页面，传递大纲ID
+  router.push({
+    name: 'ExerciseGenerationResult',
+    query: { outlineId: selectedOutlineId.value.toString() }
+  })
+  
+  isGenerating.value = false
+  closeModal()
+}
+
+// 页面加载时获取大纲列表
+onMounted(() => {
+  loadOutlines()
+})
 </script>
