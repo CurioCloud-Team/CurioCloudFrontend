@@ -1,17 +1,22 @@
 <template>
-  <div class="min-h-screen to-indigo-100 flex items-center justify-center p-4">
+  <div class="h-screen flex flex-col overflow-hidden transition-all duration-500 ease-in-out">
     <!-- Back Button -->
-    <button class="fixed top-6 left-6 btn btn-ghost btn-sm text-gray-600" @click="goBack">
+    <button class="fixed top-6 left-6 btn btn-ghost btn-sm text-gray-600 z-10" @click="goBack">
       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
       </svg>
       返回
     </button>
 
-    <div class="w-full max-w-4xl flex flex-col items-center">
-      <!-- Main Content -->
-      <div class="text-center mb-8 flex flex-col items-center">
-        <svg width="220" height="220" viewBox="0 0 360 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Initial View -->
+    <div 
+      v-if="viewMode === 'initial'" 
+      class="flex-1 flex items-center justify-center p-4 transition-all duration-700 ease-in-out"
+    >
+      <div class="w-full max-w-4xl flex flex-col items-center">
+        <!-- Main Content -->
+        <div class="text-center mb-8 flex flex-col items-center transition-all duration-500">
+          <svg width="220" height="220" viewBox="0 0 360 360" fill="none" xmlns="http://www.w3.org/2000/svg" class="transform transition-transform duration-500 hover:scale-105">
           <g clip-path="url(#clip0_15_2)">
             <path
               d="M235.08 157.91C238.24 158.853 263.312 168.191 275.453 172.743L269.009 182.462C269.009 182.462 254.204 177.791 248.255 176.522C242.306 175.253 227.366 173.579 227.366 173.579L230.403 198.739C230.742 201.545 228.793 204.114 225.999 204.543C223.183 204.975 220.537 203.077 220.045 200.271L213.774 164.516C213.278 161.692 214.402 158.826 216.686 157.091C218.288 155.874 220.304 155.332 222.297 155.614C226.658 156.23 232.596 157.169 235.08 157.91Z"
@@ -70,11 +75,14 @@
       </div>
 
       <!-- Input Container -->
-      <div class="bg-white rounded-2xl p-6 max-w-3xl mx-auto w-full">
-        <!-- Smart Input Area -->
-        <div class="relative">
+    <div class="bg-white rounded-2xl p-6 max-w-3xl mx-auto w-full overflow-visible px-4">
+          <!-- Smart Input Area -->
+          <div class="relative">
           <!-- Template-based Input -->
-          <div class="w-full min-h-[120px] max-h-[300px] overflow-y-auto text-lg leading-relaxed text-gray-800">
+          <div :class="[
+            'w-full min-h-[120px] text-lg leading-relaxed text-gray-800',
+            viewMode === 'initial' ? 'max-h-[300px] overflow-y-auto' : ''
+          ]">
             <div class="flex flex-wrap items-center gap-1">
               <span>生成</span>
               
@@ -219,9 +227,99 @@
             </div>
           </div>
         </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat View -->
+    <div 
+      v-if="viewMode === 'chat'" 
+      class="flex-1 flex flex-col transition-all duration-700 ease-in-out"
+    >
+      <!-- Chat Messages Area -->
+      <div class="flex-1 overflow-auto smooth-scroll" ref="chatContainer">
+        <div class="max-w-4xl mx-auto space-y-4">
+          <!-- Messages -->
+          <div 
+            v-for="(message, index) in chatMessages" 
+            :key="index"
+            class="flex gap-4 animate-fade-in opacity-0"
+            :style="{ animationDelay: `${index * 200}ms` }"
+          >
+            <!-- AI Avatar -->
+            <div v-if="message.type === 'ai'" class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+              </svg>
+            </div>
+            <!-- User Avatar -->
+            <div v-else class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+            </div>
+
+            <!-- Message Content -->
+            <div class="flex-1 max-w-2xl">
+              <div :class="[
+                'rounded-2xl px-6 py-4 transition-all duration-300 ease-out',
+                message.type === 'ai' ? 'bg-white text-gray-800 shadow-sm border border-gray-100' : 'bg-blue-500 text-white ml-auto shadow-md'
+              ]">
+                <p class="text-base leading-relaxed">{{ message.content }}</p>
+              </div>
+              <div class="text-sm text-gray-500 mt-2" v-if="message.type === 'ai'">
+                AI助手
+              </div>
+            </div>
+          </div>
+
+          <!-- Typing Indicator -->
+          <div v-if="isTyping" class="flex gap-4 animate-fade-in opacity-0">
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+              </svg>
+            </div>
+            <div class="flex-1 max-w-2xl">
+              <div class="bg-white rounded-2xl px-6 py-4 shadow-sm border border-gray-100">
+                <div class="flex space-x-1">
+                  <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                  <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                  <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
+      <!-- Chat Input Area -->
+      <div class="mb-9">
+        <div class="max-w-4xl mx-auto flex gap-3">
+          <div class="flex-1">
+            <input 
+              v-model="newUserMessage"
+              type="text"
+              class="input input-bordered w-full rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+              placeholder="输入您的消息..."
+              @keydown.enter="sendNewMessage"
+            />
+          </div>
+          <button 
+            class="btn btn-primary rounded-full w-12 h-12 p-0 flex items-center justify-center hover:scale-105 transition-transform duration-200"
+            @click="sendNewMessage" 
+            :disabled="!newUserMessage.trim()"
+            title="发送消息"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
+
   </div>
 </template>
 
@@ -229,9 +327,25 @@
 import { ref, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
+// 聊天消息类型
+interface ChatMessage {
+  type: 'ai' | 'user'
+  content: string
+}
+
 const router = useRouter()
 const inputTextarea = ref<HTMLTextAreaElement>()
 const userInput = ref('')
+const chatContainer = ref<HTMLElement>()
+
+// 新增：视图模式，'initial' 为初始模板输入，'chat' 为对话模式
+const viewMode = ref<'initial' | 'chat'>('initial')
+// 新增：聊天消息列表
+const chatMessages = ref<ChatMessage[]>([])
+// 新增：聊天模式下的用户输入
+const newUserMessage = ref('')
+// 新增：AI 是否正在输入
+const isTyping = ref(false)
 
 // Template input fields
 const selectedGrade = ref('8 年级')
@@ -242,7 +356,7 @@ const additionalRequirements = ref('')
 
 // Update combined input
 const updateInput = () => {
-  const baseTemplate = `把我生成"${selectedGrade.value}"的"${selectedSubject.value}"学科"${courseName.value}"课程的教案，"${selectedDuration.value}"`
+  const baseTemplate = `生成"${selectedGrade.value}"的"${selectedSubject.value}"学科"${courseName.value}"课程的教案，"${selectedDuration.value}"`
   const additional = additionalRequirements.value.trim() ? `\n\n${additionalRequirements.value}` : ''
   userInput.value = baseTemplate + additional
 }
@@ -251,46 +365,6 @@ const updateInput = () => {
 onMounted(() => {
   updateInput()
 })
-
-// 自动调整输入框高度
-const adjustHeight = () => {
-  nextTick(() => {
-    if (inputTextarea.value) {
-      inputTextarea.value.style.height = 'auto'
-      inputTextarea.value.style.height = inputTextarea.value.scrollHeight + 'px'
-    }
-  })
-}
-
-// 处理键盘事件
-const handleKeydown = (event: KeyboardEvent) => {
-  if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-    event.preventDefault()
-    startConversation()
-  }
-}
-
-// 使用模板
-const useTemplate = (content: string) => {
-  userInput.value = content
-  adjustHeight()
-}
-
-// 开始对话
-const startConversation = () => {
-  if (!userInput.value.trim()) return
-
-  // 将初始输入保存到 sessionStorage 或通过路由参数传递
-  sessionStorage.setItem('initialTeachingRequest', userInput.value)
-
-  // 跳转到详细对话页面
-  router.push('/dashboard/teaching-design/create')
-}
-
-// 返回教学设计页面
-const goBack = () => {
-  router.push('/dashboard/teaching-design')
-}
 
 // 功能按钮（暂时为占位符）
 const addReference = () => {
@@ -301,12 +375,73 @@ const setRatio = () => {
   console.log('设置比例')
 }
 
-const setStyle = () => {
-  console.log('设置风格')
-}
-
 const voiceInput = () => {
   console.log('语音输入')
+}
+const startConversation = () => {
+  if (!userInput.value.trim()) return
+
+  // 1. 将用户的初始请求添加到消息列表
+  addMessage({
+    type: 'user',
+    content: userInput.value,
+  })
+
+  // 2. 切换到聊天视图
+  viewMode.value = 'chat'
+
+  // 3. 模拟 AI 回复
+  mockAiResponse()
+}
+
+// 新增：添加消息到列表并滚动到底部
+const addMessage = (message: ChatMessage) => {
+  chatMessages.value.push(message)
+  nextTick(() => {
+    // Give the browser a tick to render message, then scroll
+    setTimeout(() => {
+      if (chatContainer.value) {
+        try {
+          chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+        } catch (e) {
+          /* ignore */
+        }
+      }
+    }, 40)
+  })
+}
+
+// 新增：发送新消息（用于聊天模式）
+const sendNewMessage = () => {
+  if (!newUserMessage.value.trim()) return
+  addMessage({
+    type: 'user',
+    content: newUserMessage.value,
+  })
+  newUserMessage.value = ''
+  mockAiResponse()
+}
+
+// 新增：模拟 AI 回复
+const mockAiResponse = () => {
+  isTyping.value = true
+  setTimeout(() => {
+    isTyping.value = false
+    const responses = [
+      '好的，我正在处理您的请求...',
+      '明白了，请稍等，我正在为您生成内容。',
+      '收到！让我想一想...',
+    ]
+    addMessage({
+      type: 'ai',
+      content: responses[Math.floor(Math.random() * responses.length)],
+    })
+  }, 1200)
+}
+
+// 返回教学设计页面
+const goBack = () => {
+  router.push('/dashboard/teaching-design')
 }
 
 // 页面加载时聚焦输入框
@@ -318,6 +453,22 @@ nextTick(() => {
 </script>
 
 <style scoped>
+/* 淡入动画 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
 /* 移除默认的 textarea 边框和焦点样式 */
 textarea:focus {
   outline: none;
@@ -325,21 +476,43 @@ textarea:focus {
 }
 
 /* 自定义滚动条 */
-textarea::-webkit-scrollbar {
-  width: 4px;
+textarea::-webkit-scrollbar,
+::-webkit-scrollbar {
+  width: 6px;
 }
 
-textarea::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 2px;
+textarea::-webkit-scrollbar-track,
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
 }
 
-textarea::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 2px;
+textarea::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
 }
 
-textarea::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+textarea::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 输入框焦点效果 */
+.input:focus,
+.textarea:focus,
+.select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* 按钮悬停效果 */
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+/* 平滑过渡 */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>

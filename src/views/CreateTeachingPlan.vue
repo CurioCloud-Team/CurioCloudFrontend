@@ -1,61 +1,67 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-    <div class="w-full max-w-2xl">
+  <div class="min-h-screen flex flex-col">
+    <!-- Back Button -->
+    <button class="fixed top-6 left-6 btn btn-ghost btn-sm text-gray-600 z-10" @click="goBack">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      返回
+    </button>
+
+    <div class="flex-1 flex flex-col">
       <!-- Chat Container -->
-      <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div class="flex-1 flex flex-col">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
-          <div class="flex items-center justify-between">
+        <div class="bg-white border-b border-gray-200 p-6">
+          <div class="flex items-center justify-center">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                 </svg>
               </div>
               <div>
-                <h1 class="text-lg font-semibold">AI 教案助手</h1>
-                <p class="text-white/80 text-sm">让我来帮您创建一份完美的教案</p>
+                <h1 class="text-lg font-semibold text-gray-800">AI 教案助手</h1>
+                <p class="text-gray-600 text-sm">让我来帮您创建一份完美的教案</p>
               </div>
             </div>
-            <button class="btn btn-ghost btn-sm text-white" @click="goBack">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
           </div>
         </div>
 
         <!-- Chat Messages -->
-        <div class="h-96 overflow-y-auto p-6 space-y-4" ref="chatContainer">
-          <!-- AI Messages -->
-          <div v-for="(message, index) in chatMessages" :key="index" class="flex gap-3">
-            <!-- AI Avatar -->
-            <div v-if="message.type === 'ai'" class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-              </svg>
-            </div>
-            <!-- User Avatar -->
-            <div v-else class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-              </svg>
-            </div>
+        <div class="flex-1 overflow-y-auto p-6 bg-gray-50 max-w-4xl mx-auto w-full" ref="chatContainer">
+          <div class="space-y-6">
+            <!-- AI Messages -->
+            <div v-for="(message, index) in chatMessages" :key="index" 
+                 class="flex gap-4 opacity-0 transform translate-y-4 animate-fade-in"
+                 :style="{ animationDelay: `${index * 100}ms` }">
+              <!-- AI Avatar -->
+              <div v-if="message.type === 'ai'" class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                </svg>
+              </div>
+              <!-- User Avatar -->
+              <div v-else class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
             
             <!-- Message Content -->
-            <div class="flex-1">
+            <div class="flex-1 max-w-2xl">
               <div :class="[
-                'rounded-2xl px-4 py-3 max-w-md',
-                message.type === 'ai' ? 'bg-gray-100 text-gray-800' : 'bg-blue-500 text-white ml-auto'
+                'rounded-2xl px-6 py-4 transition-all duration-300 ease-out',
+                message.type === 'ai' ? 'bg-white text-gray-800 shadow-sm border border-gray-100' : 'bg-blue-500 text-white ml-auto shadow-md'
               ]">
-                <p class="text-sm">{{ message.content }}</p>
+                <p class="text-base leading-relaxed">{{ message.content }}</p>
                 
                 <!-- Quick Action Buttons for AI messages -->
-                <div v-if="message.type === 'ai' && message.options" class="mt-3 flex flex-wrap gap-2">
+                <div v-if="message.type === 'ai' && message.options" class="mt-4 flex flex-wrap gap-2">
                   <button 
                     v-for="option in message.options" 
                     :key="option.value"
-                    class="btn btn-xs btn-outline"
+                    class="btn btn-sm btn-outline hover:scale-105 transition-transform duration-200"
                     @click="selectOption(option)"
                   >
                     {{ option.label }}
@@ -63,24 +69,24 @@
                 </div>
 
                 <!-- Input Field for Current Question -->
-                <div v-if="message.type === 'ai' && message.showInput && index === chatMessages.length - 1" class="mt-3">
+                <div v-if="message.type === 'ai' && message.showInput && index === chatMessages.length - 1" class="mt-6 transform transition-all duration-500 ease-out">
                   <!-- Select type with quick options -->
-                  <div v-if="currentQuestion.type === 'select'" class="space-y-3">
+                  <div v-if="currentQuestion.type === 'select'" class="space-y-4">
                     <!-- Quick option buttons -->
-                    <div class="bg-gray-50 rounded-lg p-3">
-                      <div class="text-xs text-gray-600 mb-2">快速选择：</div>
-                      <div class="flex flex-wrap gap-2">
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                      <div class="text-sm text-gray-600 mb-3">快速选择：</div>
+                      <div class="flex flex-wrap gap-3">
                         <button 
                           v-for="option in currentQuestion.options" 
                           :key="option"
-                          class="btn btn-outline btn-sm hover:btn-primary transition-colors"
+                          class="btn btn-outline btn-sm hover:btn-primary transition-all duration-300 hover:scale-105"
                           :class="{ 
-                            'btn-primary border-primary text-white': currentAnswer === option,
+                            'btn-primary border-primary text-white shadow-md': currentAnswer === option,
                             'bg-white border-gray-300 text-gray-700 hover:border-primary hover:text-primary': currentAnswer !== option
                           }"
                           @click="selectQuickOption(option)"
                         >
-                          <svg v-if="currentAnswer === option" class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg v-if="currentAnswer === option" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                           </svg>
                           {{ option }}
@@ -88,11 +94,11 @@
                       </div>
                     </div>
                     <!-- Traditional select as backup (optional) -->
-                    <div class="text-xs text-gray-500 text-center">
+                    <div class="text-sm text-gray-500 text-center">
                       或选择其他选项：
                     </div>
                     <select 
-                      class="select select-bordered select-sm w-full bg-white"
+                      class="select select-bordered w-full bg-white transition-all duration-300 focus:scale-105"
                       v-model="currentAnswer"
                       @change="handleAnswerChange"
                     >
@@ -103,27 +109,27 @@
                     </select>
                   </div>
                   <!-- Textarea type -->
-                  <div v-else-if="currentQuestion.type === 'textarea'" class="space-y-2">
+                  <div v-else-if="currentQuestion.type === 'textarea'" class="space-y-3">
                     <textarea 
-                      class="textarea textarea-bordered textarea-sm w-full h-20 resize-none"
+                      class="textarea textarea-bordered w-full h-24 resize-none transition-all duration-300 focus:scale-105 focus:shadow-lg"
                       :placeholder="currentQuestion.placeholder"
                       v-model="currentAnswer"
                       @input="handleAnswerChange"
                     ></textarea>
                   </div>
                   <!-- Text input type -->
-                  <div v-else class="space-y-2">
+                  <div v-else class="space-y-3">
                     <div class="relative">
                       <input 
                         type="text"
-                        class="input input-bordered input-sm w-full pr-12"
+                        class="input input-bordered w-full pr-12 transition-all duration-300 focus:scale-105 focus:shadow-lg"
                         :placeholder="currentQuestion.placeholder"
                         v-model="currentAnswer"
                         @keyup.enter="submitAnswer"
                         @input="handleAnswerChange"
                       />
                       <!-- Voice input button (visual only) -->
-                      <button class="btn btn-ghost btn-sm absolute right-1 top-1/2 transform -translate-y-1/2" disabled>
+                      <button class="btn btn-ghost btn-sm absolute right-2 top-1/2 transform -translate-y-1/2 hover:scale-110 transition-transform duration-200" disabled>
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
                         </svg>
@@ -132,32 +138,32 @@
                   </div>
                   <!-- Submit button -->
                   <button 
-                    class="btn btn-primary btn-sm mt-2 w-full"
+                    class="btn btn-primary w-full hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
                     @click="submitAnswer"
                     :disabled="!currentAnswer || currentAnswer.trim() === ''"
                   >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                     </svg>
                     确认
                   </button>
                 </div>
               </div>
-              <div class="text-xs text-gray-500 mt-1" v-if="message.type === 'ai'">
+              <div class="text-sm text-gray-500 mt-2" v-if="message.type === 'ai'">
                 AI助手
               </div>
             </div>
           </div>
 
           <!-- Typing Indicator -->
-          <div v-if="isTyping" class="flex gap-3">
-            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div v-if="isTyping" class="flex gap-4 opacity-0 animate-fade-in">
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
               </svg>
             </div>
-            <div class="flex-1">
-              <div class="bg-gray-100 rounded-2xl px-4 py-3 max-w-md">
+            <div class="flex-1 max-w-2xl">
+              <div class="bg-white rounded-2xl px-6 py-4 shadow-sm border border-gray-100">
                 <div class="flex space-x-1">
                   <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
                   <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
@@ -169,18 +175,18 @@
         </div>
 
         <!-- Bottom Actions -->
-        <div class="p-4 bg-gray-50 border-t">
+        <div class="p-6 bg-white border-t border-gray-200 max-w-4xl mx-auto w-full">
           <!-- Quick suggestions for current question (if applicable) -->
-          <div v-if="currentQuestionIndex < questions.length && questions[currentQuestionIndex]?.type === 'textarea'" class="mb-3">
-            <div class="text-xs text-gray-500 mb-2">快速建议：</div>
+          <div v-if="currentQuestionIndex < questions.length && questions[currentQuestionIndex]?.type === 'textarea'" class="mb-4">
+            <div class="text-sm text-gray-600 mb-3">快速建议：</div>
             <div class="flex flex-wrap gap-2">
               <button 
                 v-for="suggestion in getQuickSuggestions()" 
                 :key="suggestion"
-                class="btn btn-ghost btn-xs text-blue-600"
+                class="btn btn-ghost btn-sm text-blue-600 hover:scale-105 transition-transform duration-200"
                 @click="addSuggestion(suggestion)"
               >
-                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 {{ suggestion }}
@@ -190,33 +196,33 @@
           
           <!-- Progress and actions -->
           <div class="flex justify-between items-center">
-            <div class="flex items-center gap-3">
-              <div class="text-sm text-gray-500">
+            <div class="flex items-center gap-4">
+              <div class="text-base text-gray-600">
                 {{ completedFields }} / {{ totalFields }} 项已完成
               </div>
               <!-- Progress bar -->
-              <div class="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="w-32 h-3 bg-gray-200 rounded-full overflow-hidden">
                 <div 
-                  class="h-full bg-blue-500 transition-all duration-300"
+                  class="h-full bg-blue-500 transition-all duration-500 ease-out"
                   :style="{ width: `${(completedFields / totalFields) * 100}%` }"
                 ></div>
               </div>
             </div>
-            <div class="flex gap-2">
-              <button class="btn btn-ghost btn-sm" @click="saveDraft" v-if="completedFields > 0">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex gap-3">
+              <button class="btn btn-ghost hover:scale-105 transition-all duration-300" @click="saveDraft" v-if="completedFields > 0">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"></path>
                 </svg>
                 保存草稿
               </button>
               <button 
-                class="btn btn-primary btn-sm"
+                class="btn btn-primary hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
                 @click="generatePlan"
                 v-if="completedFields === totalFields"
                 :class="{ 'loading': isGenerating }"
                 :disabled="isGenerating"
               >
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" v-if="!isGenerating">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" v-if="!isGenerating">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
                 {{ isGenerating ? '生成中...' : '生成教案' }}
@@ -226,6 +232,7 @@
         </div>
       </div>
     </div>
+  </div>
   </div>
 </template>
 
@@ -593,3 +600,68 @@ onMounted(() => {
   }
 })
 </script>
+
+<style scoped>
+/* 淡入动画 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+/* 平滑滚动 */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 输入框焦点效果 */
+.input:focus,
+.textarea:focus,
+.select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* 按钮悬停效果 */
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+/* 消息气泡动画 */
+.message-bubble {
+  transition: all 0.3s ease;
+}
+
+.message-bubble:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+</style>

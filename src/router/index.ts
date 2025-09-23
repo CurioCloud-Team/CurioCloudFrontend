@@ -8,6 +8,7 @@ import RegisterSuccessPage from '../views/RegisterSuccessPage.vue'
 import ForgotPasswordPage from '../views/ForgotPasswordPage.vue'
 import DashboardHome from '../views/DashboardHome.vue'
 import TeachingDesign from '../views/TeachingDesign.vue'
+import TeachingOutlineDetail from '../views/TeachingOutlineDetail.vue'
 import TeachingPlanStart from '../views/TeachingPlanStart.vue'
 import CreateTeachingPlan from '../views/CreateTeachingPlan.vue'
 import TeachingResources from '../views/TeachingResources.vue'
@@ -67,6 +68,11 @@ const routes = [
         path: 'teaching-design',
         name: 'TeachingDesign',
         component: TeachingDesign
+      },
+      {
+        path: 'teaching-design/outline/:id',
+        name: 'TeachingOutlineDetail',
+        component: TeachingOutlineDetail
       },
       {
         path: 'teaching-design/start',

@@ -78,13 +78,14 @@
         <!-- Outline items container with infinite scroll -->
         <div 
           ref="scrollContainer"
-          class="space-y-4 max-h-[600px] overflow-y-auto pr-2"
+          class="space-y-4 overflow-y-auto pr-2"
           @scroll="handleScroll"
         >
           <div 
             v-for="outline in displayedOutlines" 
             :key="outline.id"
-            class="border border-base-300 rounded-lg p-4 hover:shadow-md transition-shadow"
+            class=" bg-white rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer hover:bg-base-50"
+            @click="previewOutline(outline)"
           >
             <div class="flex items-start justify-between">
               <div class="flex-1">
@@ -104,7 +105,7 @@
                   <span>课时：{{ outline.duration }}</span>
                 </div>
               </div>
-              <div class="flex gap-2 ml-4">
+              <div class="flex gap-2 ml-4" @click.stop>
                 <button class="btn btn-ghost btn-sm" @click="previewOutline(outline)">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -112,24 +113,6 @@
                   </svg>
                   预览
                 </button>
-                <button class="btn btn-ghost btn-sm" @click="editOutline(outline)">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                  </svg>
-                  编辑
-                </button>
-                <div class="dropdown dropdown-end">
-                  <label tabindex="0" class="btn btn-ghost btn-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                    </svg>
-                  </label>
-                  <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-32">
-                    <li><a @click="copyOutline(outline)">复制</a></li>
-                    <li><a @click="shareOutline(outline)">分享</a></li>
-                    <li><a @click="deleteOutline(outline)" class="text-error">删除</a></li>
-                  </ul>
-                </div>
               </div>
             </div>
           </div>
@@ -389,7 +372,7 @@ const createNewOutline = () => {
 }
 
 const previewOutline = (outline: TeachingOutline) => {
-  console.log('预览教案:', outline)
+  router.push(`/dashboard/teaching-design/outline/${outline.id}`)
 }
 
 const editOutline = (outline: TeachingOutline) => {
