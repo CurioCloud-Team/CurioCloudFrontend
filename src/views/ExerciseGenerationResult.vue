@@ -10,10 +10,10 @@
         </button>
         <div>
           <h1 class="text-2xl font-bold text-base-content">
-            {{ isFromSaved ? '我的习题' : '习题生成结果' }}
+            {{ isFromSaved ? outlineTitle : '习题生成结果' }}
           </h1>
           <p class="text-base-content/60 mt-1">
-            {{ isFromSaved ? '查看已保存的习题' : '基于' }}「{{ outlineTitle }}」{{ isFromSaved ? '' : '生成的智能习题' }}
+            {{ isFromSaved ? '已保存的习题' : '基于' }}「{{ outlineTitle }}」{{ isFromSaved ? '' : '生成的智能习题' }}
           </p>
         </div>
       </div>

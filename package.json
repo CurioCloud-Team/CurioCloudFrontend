@@ -12,10 +12,13 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
     "axios": "^1.12.2",
+    "echarts": "^5.6.0",
     "tailwindcss": "^4.1.13",
     "vue": "^3.5.18",
+    "vue-echarts": "^7.0.3",
     "vue-router": "^4.5.1",
-    "vue3-lottie": "^3.3.1"
+    "vue3-lottie": "^3.3.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "^24.5.2",

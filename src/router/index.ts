@@ -15,6 +15,8 @@ import TeachingResources from '../views/TeachingResources.vue'
 import ExerciseAssistant from '../views/ExerciseAssistant.vue'
 import ExerciseGenerationResult from '../views/ExerciseGenerationResult.vue'
 import LearningAnalysis from '../views/LearningAnalysis.vue'
+import AnalysisResult from '../views/AnalysisResult.vue'
+import SavedReports from '../views/SavedReports.vue'
 
 const routes = [
   {
@@ -104,6 +106,16 @@ const routes = [
         path: 'learning-analysis',
         name: 'LearningAnalysis',
         component: LearningAnalysis
+      },
+      {
+        path: 'learning-analysis/result',
+        name: 'AnalysisResult',
+        component: AnalysisResult
+      },
+      {
+        path: 'learning-analysis/saved-reports',
+        name: 'SavedReports',
+        component: SavedReports
       },
       {
         path: '',
