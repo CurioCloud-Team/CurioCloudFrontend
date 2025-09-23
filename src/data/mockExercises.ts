@@ -94,3 +94,63 @@ export function getQuestionTypeText(type: string): string {
   }
   return typeMap[type] || type
 }
+
+// 保存的习题结果类型
+export interface SavedExerciseResult {
+  id: string
+  outline_id: number
+  outline_title: string
+  exercises: Exercise[]
+  created_at: string
+  saved_at: string
+  total_count: number
+}
+
+// 模拟保存的习题结果（用于展示在"我的习题"中）
+export const savedExerciseResults: SavedExerciseResult[] = [
+  {
+    id: 'saved_001',
+    outline_id: 18,
+    outline_title: 'GoLang入门教程教学大纲',
+    exercises: mockExerciseResults[0].exercises,
+    created_at: '2024-09-24T10:30:00Z',
+    saved_at: '2024-09-24T10:35:00Z',
+    total_count: 5
+  }
+]
+
+// 添加保存的习题结果
+export function addSavedExerciseResult(result: ExerciseGenerationResult): SavedExerciseResult {
+  const savedResult: SavedExerciseResult = {
+    id: `saved_${Date.now()}`,
+    outline_id: result.lesson_plan_id,
+    outline_title: result.outline_title || '未知大纲',
+    exercises: result.exercises,
+    created_at: result.created_at,
+    saved_at: new Date().toISOString(),
+    total_count: result.exercises.length
+  }
+  
+  savedExerciseResults.unshift(savedResult) // 添加到开头
+  return savedResult
+}
+
+// 获取保存的习题结果列表
+export function getSavedExerciseResults(): SavedExerciseResult[] {
+  return savedExerciseResults
+}
+
+// 根据ID获取保存的习题结果
+export function getSavedExerciseResult(id: string): SavedExerciseResult | null {
+  return savedExerciseResults.find(result => result.id === id) || null
+}
+
+// 删除保存的习题结果
+export function deleteSavedExerciseResult(id: string): boolean {
+  const index = savedExerciseResults.findIndex(result => result.id === id)
+  if (index !== -1) {
+    savedExerciseResults.splice(index, 1)
+    return true
+  }
+  return false
+}
