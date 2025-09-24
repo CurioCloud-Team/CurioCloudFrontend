@@ -6,7 +6,7 @@
         <h1 class="text-2xl font-bold text-base-content">教学设计</h1>
         <p class="text-base-content/60 mt-1">创建和管理您的教学大纲</p>
       </div>
-      <button class="btn btn-primary" @click="createNewOutline">
+      <button class="btn btn-soft" @click="createNewOutline">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>

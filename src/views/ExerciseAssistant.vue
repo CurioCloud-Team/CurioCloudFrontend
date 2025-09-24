@@ -6,7 +6,7 @@
         <h1 class="text-2xl font-bold text-base-content">习题助手</h1>
         <p class="text-base-content/60 mt-1">智能生成和管理习题，提升教学效率</p>
       </div>
-      <button class="btn btn-primary" @click="showOutlineModal = true">
+      <button class="btn btn-soft" @click="showOutlineModal = true">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
         </svg>

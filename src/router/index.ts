@@ -17,6 +17,8 @@ import ExerciseGenerationResult from '../views/ExerciseGenerationResult.vue'
 import LearningAnalysis from '../views/LearningAnalysis.vue'
 import AnalysisResult from '../views/AnalysisResult.vue'
 import SavedReports from '../views/SavedReports.vue'
+import PPTGenerationResult from '../views/PPTGenerationResult.vue'
+import PPTViewer from '../views/PPTViewer.vue'
 
 const routes = [
   {
@@ -91,6 +93,16 @@ const routes = [
         path: 'teaching-resources',
         name: 'TeachingResources',
         component: TeachingResources
+      },
+      {
+        path: 'ppt-generation/:planId',
+        name: 'PPTGenerationResult',
+        component: PPTGenerationResult
+      },
+      {
+        path: 'ppt-viewer/:pptId',
+        name: 'PPTViewer',
+        component: PPTViewer
       },
       {
         path: 'exercise-assistant',
