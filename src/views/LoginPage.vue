@@ -89,8 +89,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
+const { login } = useAuth()
 
 const loginForm = ref({
   username: '',
@@ -110,6 +112,23 @@ const handleLogin = async () => {
     
     // 模拟API调用
     await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    // 模拟登录成功后的用户数据
+    const mockUserData = {
+      username: loginForm.value.username || 'demo_user',
+      email: loginForm.value.username.includes('@') 
+        ? loginForm.value.username 
+        : `${loginForm.value.username}@example.com`,
+      token: 'mock-jwt-token-' + Date.now()
+    }
+    
+    // 使用 useAuth 的 login 方法保存用户信息
+    login({
+      username: mockUserData.username,
+      email: mockUserData.email
+    }, mockUserData.token)
+    
+    console.log('登录成功，用户信息已保存')
     
     // 登录成功，跳转到成功页面
     router.push('/auth/login-success')

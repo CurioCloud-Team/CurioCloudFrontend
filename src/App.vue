@@ -5,5 +5,14 @@
 </template>
 
 <script setup lang="ts">
-// 主应用组件
+import { onMounted } from 'vue'
+import { useAuth } from '@/composables/useAuth'
+
+// 初始化认证状态
+const { initAuth } = useAuth()
+
+onMounted(() => {
+  // 应用启动时初始化认证状态
+  initAuth()
+})
 </script>

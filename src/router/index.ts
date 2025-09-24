@@ -130,4 +130,27 @@ const router = createRouter({
   routes
 })
 
+// 路由守卫：检查认证状态
+router.beforeEach((to, _from, next) => {
+  const token = localStorage.getItem('token')
+  const isAuthRoute = to.path.startsWith('/auth')
+  const isDashboardRoute = to.path.startsWith('/dashboard')
+
+  // 如果访问仪表盘但未登录，重定向到登录页
+  if (isDashboardRoute && !token) {
+    console.log('未登录，重定向到登录页')
+    next('/auth/login')
+    return
+  }
+
+  // 如果已登录但访问认证页面，重定向到仪表盘
+  if (isAuthRoute && token && to.path !== '/auth/login-success') {
+    console.log('已登录，重定向到仪表盘')
+    next('/dashboard/home')
+    return
+  }
+
+  next()
+})
+
 export default router

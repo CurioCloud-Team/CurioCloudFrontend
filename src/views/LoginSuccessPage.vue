@@ -12,7 +12,7 @@
                 </svg>
             </div>
             <h1 class="text-3xl font-bold text-gray-900 mb-2">登录成功</h1>
-            <p class="text-gray-500">欢迎回来，{{ userInfo.username || '用户' }}，你将在 5 秒后自动登录</p>
+            <p class="text-gray-500">欢迎回来，{{ userInfo?.username || '用户' }}，你将在 5 秒后自动登录</p>
         </div>
     </div>
 </template>
@@ -20,25 +20,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
-
-// 用户信息（实际使用时从后端获取）
-const userInfo = ref({
-    username: '',
-    email: ''
-})
+const { userInfo, initAuth } = useAuth()
 
 // 登录时间
 const loginTime = ref('')
 
 onMounted(() => {
-    // 模拟从后端获取用户信息
-    // 实际实现时这里会从认证服务或本地存储获取
-    userInfo.value = {
-        username: 'demo_user',
-        email: 'demo@example.com'
-    }
+    // 初始化认证状态（从 localStorage 获取用户信息）
+    initAuth()
 
     // 设置登录时间
     loginTime.value = new Date().toLocaleString('zh-CN')
@@ -48,23 +40,4 @@ onMounted(() => {
         router.push('/dashboard/home')
     }, 5000)
 })
-
-const goToDashboard = () => {
-    // 跳转到仪表盘
-    router.push('/dashboard/home')
-}
-
-const goToProfile = () => {
-    // TODO: 跳转到个人资料页
-    console.log('跳转到个人资料')
-    // router.push('/profile')
-}
-
-const logout = () => {
-    // TODO: 清除登录状态
-    console.log('退出登录')
-    // 清除认证信息
-    // localStorage.removeItem('token')
-    router.push('/auth/login')
-}
 </script>
