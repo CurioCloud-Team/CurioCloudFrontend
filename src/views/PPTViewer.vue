@@ -30,7 +30,7 @@
     <div v-if="pptData" class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- Slide List Sidebar -->
       <div class="lg:col-span-1">
-        <div class="card bg-base-100 shadow-md sticky top-4">
+        <div class="card bg-white sticky top-4">
           <div class="card-body p-4">
             <h4 class="font-semibold mb-3 flex items-center gap-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +62,7 @@
 
       <!-- Main Slide Display -->
       <div class="lg:col-span-3">
-        <div class="card bg-base-100 shadow-md">
+        <div class="card bg-white">
           <div class="card-body p-6">
             <!-- Slide Navigation -->
             <div class="flex items-center justify-between mb-6">

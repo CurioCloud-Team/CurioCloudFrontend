@@ -33,7 +33,7 @@
     </div>
 
     <!-- Generation Status -->
-    <div class="card bg-base-100 shadow-md">
+    <div class="card bg-white">
       <div class="card-body">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -57,7 +57,7 @@
     </div>
 
     <!-- Outline Info -->
-    <div class="card bg-base-100 shadow-md">
+    <div class="card bg-white">
       <div class="card-body">
         <h3 class="card-title text-base mb-3">基于教学大纲</h3>
         <div v-if="outlineInfo" class="flex items-start gap-4">
@@ -81,18 +81,10 @@
     </div>
 
     <!-- PPT Preview/Result -->
-    <div class="card bg-base-100 shadow-md">
+    <div class="card bg-white">
       <div class="card-body">
         <div class="flex items-center justify-between mb-4">
           <h3 class="card-title">生成的 PPT 内容</h3>
-          <div v-if="generationStatus === 'completed'" class="flex gap-2">
-            <button class="btn btn-outline btn-sm" @click="downloadPPT">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-4-4m4 4l4-4m6-1a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              预览下载
-            </button>
-          </div>
         </div>
 
         <!-- Loading State -->
@@ -105,18 +97,18 @@
         <!-- Completed State -->
         <div v-else-if="generationStatus === 'completed' && pptResult" class="space-y-6">
           <!-- PPT Summary -->
-          <div class="stats stats-horizontal shadow">
+          <div class="stats stats-horizontal bg-base-100">
             <div class="stat">
               <div class="stat-title">总页数</div>
               <div class="stat-value text-primary">{{ pptResult.slideCount }}</div>
             </div>
             <div class="stat">
               <div class="stat-title">文件大小</div>
-              <div class="stat-value text-secondary">{{ formatFileSize(pptResult.fileSize) }}</div>
+              <div class="stat-value text-primary">{{ formatFileSize(pptResult.fileSize) }}</div>
             </div>
             <div class="stat">
               <div class="stat-title">生成时间</div>
-              <div class="stat-value text-accent">{{ formatDuration(pptResult.generationTime) }}</div>
+              <div class="stat-value text-primary">{{ formatDuration(pptResult.generationTime) }}</div>
             </div>
           </div>
 
@@ -124,7 +116,7 @@
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <!-- Slide List Sidebar -->
             <div class="lg:col-span-1">
-              <div class="card bg-base-100 shadow-md sticky top-4">
+              <div class="card  bg-base-100 sticky top-4">
                 <div class="card-body p-4">
                   <h4 class="font-semibold mb-3 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +148,7 @@
 
             <!-- Main Slide Display -->
             <div class="lg:col-span-3">
-              <div class="card bg-base-100 shadow-md">
+              <div class="card bg-base-100">
                 <div class="card-body p-6">
                   <!-- Slide Navigation -->
                   <div class="flex items-center justify-between mb-6">
@@ -185,18 +177,6 @@
                     </div>
                     <div class="flex items-center gap-2">
                       <span class="badge badge-primary">{{ currentSlide?.type }}</span>
-                      <div class="dropdown dropdown-end">
-                        <label tabindex="0" class="btn btn-ghost btn-sm">
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                          </svg>
-                        </label>
-                        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40">
-                          <li><a @click="editSlide(currentSlideIndex)">编辑内容</a></li>
-                          <li><a @click="duplicateSlide(currentSlideIndex)">复制页面</a></li>
-                          <li><a @click="deleteSlide(currentSlideIndex)">删除页面</a></li>
-                        </ul>
-                      </div>
                     </div>
                   </div>
 
