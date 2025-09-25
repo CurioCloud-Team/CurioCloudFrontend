@@ -157,44 +157,14 @@ const route = useRoute()
 const outline = ref<TeachingOutlineDetail | null>(null)
 
 // 方法
-const getSubjectIcon = (subject: string) => {
-  const iconMap: Record<string, string> = {
-    '数学': '数',
-    '语文': '语',
-    '英语': 'En',
-    '科学': '科'
-  }
-  return iconMap[subject] || '教'
-}
-
 const editOutline = () => {
   console.log('编辑教学大纲')
   // 跳转到编辑页面
 }
 
-const shareOutline = () => {
-  console.log('分享教学大纲')
-  // 实现分享功能
-}
-
-const duplicateOutline = () => {
-  console.log('复制教学大纲')
-  // 实现复制功能
-}
-
-const exportOutline = () => {
-  console.log('导出教学大纲')
-  // 实现导出功能
-}
-
 const deleteOutline = () => {
   console.log('删除教学大纲')
   // 实现删除功能，显示确认对话框
-}
-
-const downloadResource = (resource: any) => {
-  console.log('下载资源:', resource)
-  // 实现资源下载功能
 }
 
 // 生命周期

@@ -519,13 +519,6 @@ const discardPPT = () => {
   router.push('/dashboard/teaching-resources')
 }
 
-const downloadPPT = () => {
-  if (pptResult.value?.downloadUrl) {
-    // 实际实现中应该处理文件下载
-    console.log('下载PPT:', pptResult.value.downloadUrl)
-  }
-}
-
 const retryGeneration = () => {
   generationStatus.value = 'generating'
   generationProgress.value = 0
@@ -543,22 +536,6 @@ const formatDuration = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = seconds % 60
   return `${minutes}分${remainingSeconds}秒`
-}
-
-// 幻灯片编辑方法
-const editSlide = (slideIndex: number) => {
-  console.log('编辑幻灯片:', slideIndex)
-  // 这里可以实现编辑功能
-}
-
-const duplicateSlide = (slideIndex: number) => {
-  console.log('复制幻灯片:', slideIndex)
-  // 这里可以实现复制功能
-}
-
-const deleteSlide = (slideIndex: number) => {
-  console.log('删除幻灯片:', slideIndex)
-  // 这里可以实现删除功能
 }
 
 // 模拟API调用生成PPT

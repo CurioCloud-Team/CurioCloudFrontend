@@ -221,14 +221,6 @@ const router = useRouter()
 // 当前步骤 (1: 输入邮箱, 2: 验证码, 3: 设置新密码, 4: 成功)
 const currentStep = ref(1)
 
-// 步骤描述
-const stepDescriptions = [
-  '请输入您的注册邮箱地址，我们将向该邮箱发送验证码',
-  '请输入您收到的6位验证码',
-  '请设置您的新密码',
-  '密码重置完成'
-]
-
 // 表单数据
 const resetForm = ref({
   email: '',

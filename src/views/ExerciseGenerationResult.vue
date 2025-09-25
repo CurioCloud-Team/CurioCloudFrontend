@@ -195,14 +195,12 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { 
   type Exercise, 
-  type ExerciseGenerationResult as ExerciseResult,
   mockExerciseResults, 
   getDifficultyText, 
   getQuestionTypeText,
   addSavedExerciseResult,
   getSavedExerciseResult,
-  deleteSavedExerciseResult,
-  type SavedExerciseResult
+  deleteSavedExerciseResult
 } from '../data/mockExercises'
 import { mockOutlineDetails } from '../data/mockOutlines'
 
@@ -218,7 +216,6 @@ const isSaving = ref(false)
 const isDeleting = ref(false)
 const isExporting = ref(false)
 const showDiscardModal = ref(false)
-const showDeleteModal = ref(false)
 const isFromSaved = ref(false)
 const savedResultId = ref<string | null>(null)
 
@@ -229,10 +226,6 @@ const outlineId = computed(() => {
 
 const savedId = computed(() => {
   return route.query.savedId as string || null
-})
-
-const isEditMode = computed(() => {
-  return route.query.edit === 'true'
 })
 
 // 获取题型统计

@@ -375,23 +375,6 @@ const previewOutline = (outline: TeachingOutline) => {
   router.push(`/dashboard/teaching-design/outline/${outline.id}`)
 }
 
-const editOutline = (outline: TeachingOutline) => {
-  console.log('编辑教案:', outline)
-}
-
-const copyOutline = (outline: TeachingOutline) => {
-  console.log('复制教案:', outline)
-}
-
-const shareOutline = (outline: TeachingOutline) => {
-  console.log('分享教案:', outline)
-}
-
-const deleteOutline = (outline: TeachingOutline) => {
-  console.log('删除教案:', outline)
-  // 实际项目中这里会显示确认对话框
-}
-
 // 生命周期
 onMounted(() => {
   loadMoreData()
