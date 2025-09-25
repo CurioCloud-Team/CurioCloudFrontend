@@ -59,6 +59,19 @@
               </label>
             </div>
 
+            <!-- 全名输入框（可选） -->
+            <div class="form-control flex flex-col gap-2">
+              <label class="label">
+                <span class="label-text">全名 <span class="text-gray-400">(可选)</span></span>
+              </label>
+              <input 
+                type="text"
+                class="input w-full"
+                v-model="registerForm.full_name"
+                placeholder="请输入您的全名"
+              />
+            </div>
+
             <!-- 密码输入框 -->
             <div class="form-control flex flex-col gap-2">
               <label class="label">
@@ -76,9 +89,6 @@
               <label class="label" v-if="errors.password">
                 <span class="label-text-alt text-error">{{ errors.password }}</span>
               </label>
-              <label class="label" v-else>
-                <span class="label-text-alt text-gray-500">密码至少8位，包含字母和数字</span>
-              </label>
             </div>
 
             <!-- 确认密码输入框 -->
@@ -90,7 +100,7 @@
                 type="password"
                 class="input w-full"
                 :class="{ 'input-error': errors.confirmPassword }"
-                v-model="registerForm.confirmPassword"
+                v-model="registerForm.confirm_password"
                 @blur="validateField('confirmPassword')"
                 placeholder="请再次输入密码"
                 required
@@ -98,17 +108,31 @@
               <label class="label" v-if="errors.confirmPassword">
                 <span class="label-text-alt text-error">{{ errors.confirmPassword }}</span>
               </label>
+              <label class="label" v-else-if="!isPasswordValid && registerForm.password.length > 0">
+                <span class="label-text-alt text-gray-500">密码至少8位，包含字母和数字</span>
+              </label>
             </div>
 
             <!-- 协议同意选项 -->
             <div class="form-control">
               <label class="label cursor-pointer justify-start">
-                <input type="checkbox" class="checkbox checkbox-primary mr-3" v-model="registerForm.agreeTerms" required />
+                <input type="checkbox" class="checkbox checkbox-primary mr-3" v-model="agreeTerms" required />
                 <span class="label-text">我同意 
                   <a href="#" class="link link-primary">用户协议</a> 和 
                   <a href="#" class="link link-primary">隐私政策</a>
                 </span>
               </label>
+            </div>
+
+            <!-- 错误消息 -->
+            <div v-if="errorMessage" class="alert alert-error mt-4 shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h3 class="font-bold">注册失败</h3>
+                <div class="text-xs">{{ errorMessage }}</div>
+              </div>
             </div>
 
           <!-- 注册按钮 -->
@@ -131,18 +155,23 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuth } from '@/composables/useAuth'
+import { registerAPI, type UserCreate } from '@/services/auth'
 
 const router = useRouter()
+const { login } = useAuth()
 
-const registerForm = ref({
+const registerForm = ref<UserCreate>({
   username: '',
   email: '',
   password: '',
-  confirmPassword: '',
-  agreeTerms: false
+  confirm_password: '',
+  full_name: undefined
 })
 
 const isLoading = ref(false)
+const errorMessage = ref('')
+const agreeTerms = ref(false)
 const errors = ref({
   username: '',
   email: '',
@@ -171,7 +200,7 @@ const isPasswordValid = computed(() => {
 
 // 密码确认验证
 const passwordMatch = computed(() => {
-  return registerForm.value.password === registerForm.value.confirmPassword && registerForm.value.confirmPassword !== ''
+  return registerForm.value.password === registerForm.value.confirm_password && registerForm.value.confirm_password !== ''
 })
 
 // 表单整体验证
@@ -180,7 +209,7 @@ const isFormValid = computed(() => {
          isEmailValid.value && 
          isPasswordValid.value && 
          passwordMatch.value && 
-         registerForm.value.agreeTerms
+         agreeTerms.value
 })
 
 const validateField = (field: string) => {
@@ -222,22 +251,53 @@ const handleRegister = async () => {
   }
   
   isLoading.value = true
-  console.log('注册信息:', registerForm.value)
+  errorMessage.value = ''
   
   try {
-    // TODO: 实现实际的注册逻辑
-    // const response = await registerAPI(registerForm.value)
+    // 调用真实的注册 API
+    const response = await registerAPI(registerForm.value)
     
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    // 使用 useAuth 的 login 方法保存用户信息和令牌
+    login({
+      username: response.user.username,
+      email: response.user.email
+    }, response.token.access_token)
+    
+    console.log('注册成功，用户信息已保存')
     
     // 注册成功，跳转到成功页面
     router.push('/auth/register-success')
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('注册失败:', error)
-    // TODO: 显示错误信息
-    alert('注册失败，请稍后重试')
+    
+    // 处理不同的错误情况
+    if (error.response) {
+      // 服务器返回了错误响应
+      const status = error.response.status
+      const data = error.response.data
+      
+      if (status === 422) {
+        // 处理验证错误
+        if (data?.detail && Array.isArray(data.detail)) {
+          errorMessage.value = data.detail.map((item: any) => item.msg).join(', ')
+        } else {
+          errorMessage.value = '输入数据格式错误，请检查用户名、邮箱和密码'
+        }
+      } else if (status === 400) {
+        errorMessage.value = data?.detail || '注册信息有误，请检查后重试'
+      } else if (status >= 500) {
+        errorMessage.value = '服务器错误，请稍后重试'
+      } else {
+        errorMessage.value = data?.detail || data?.message || '注册失败，请稍后重试'
+      }
+    } else if (error.request) {
+      // 网络错误，没有收到响应
+      errorMessage.value = '网络连接失败，请检查网络连接后重试'
+    } else {
+      // 其他错误
+      errorMessage.value = '注册失败，请稍后重试'
+    }
   } finally {
     isLoading.value = false
   }

@@ -45,6 +45,17 @@
       </label>
     </div>
 
+    <!-- 错误消息 -->
+    <div v-if="errorMessage" class="alert alert-error mb-4 shadow-lg">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <div>
+        <h3 class="font-bold">登录失败</h3>
+        <div class="text-xs">{{ errorMessage }}</div>
+      </div>
+    </div>
+
     <!-- 登录按钮 -->
     <div class="form-control mt-4">
       <button 
@@ -90,53 +101,70 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import { loginAPI, type UserLogin } from '@/services/auth'
 
 const router = useRouter()
 const { login } = useAuth()
 
-const loginForm = ref({
+const loginForm = ref<UserLogin>({
   username: '',
-  password: '',
-  rememberMe: false
+  password: ''
 })
 
 const isLoading = ref(false)
+const errorMessage = ref('')
 
 const handleLogin = async () => {
   isLoading.value = true
-  console.log('登录信息:', loginForm.value)
-  
+  errorMessage.value = ''
+
   try {
-    // TODO: 实现实际的登录逻辑
-    // const response = await loginAPI(loginForm.value)
-    
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // 模拟登录成功后的用户数据
-    const mockUserData = {
-      username: loginForm.value.username || 'demo_user',
-      email: loginForm.value.username.includes('@') 
-        ? loginForm.value.username 
-        : `${loginForm.value.username}@example.com`,
-      token: 'mock-jwt-token-' + Date.now()
-    }
-    
-    // 使用 useAuth 的 login 方法保存用户信息
+    // 调用真实的登录 API
+    const response = await loginAPI(loginForm.value)
+
+    // 使用 useAuth 的 login 方法保存用户信息和令牌
     login({
-      username: mockUserData.username,
-      email: mockUserData.email
-    }, mockUserData.token)
-    
+      username: response.user.username,
+      email: response.user.email
+    }, response.token.access_token)
+
     console.log('登录成功，用户信息已保存')
-    
+
     // 登录成功，跳转到成功页面
     router.push('/auth/login-success')
-    
-  } catch (error) {
+
+  } catch (error: any) {
     console.error('登录失败:', error)
-    // TODO: 显示错误信息
-    alert('登录失败，请检查用户名和密码')
+
+    // 处理不同的错误情况
+    if (error.response) {
+      // 服务器返回了错误响应
+      const status = error.response.status
+      const data = error.response.data
+
+      if (status === 401) {
+        errorMessage.value = '用户名或密码错误'
+      } else if (status === 422) {
+        // 处理验证错误
+        if (data?.detail && Array.isArray(data.detail)) {
+          errorMessage.value = data.detail.map((item: any) => item.msg).join(', ')
+        } else {
+          errorMessage.value = '输入数据格式错误，请检查用户名和密码'
+        }
+      } else if (status === 404) {
+        errorMessage.value = '用户不存在'
+      } else if (status >= 500) {
+        errorMessage.value = '服务器错误，请稍后重试'
+      } else {
+        errorMessage.value = data?.detail || data?.message || '登录失败，请稍后重试'
+      }
+    } else if (error.request) {
+      // 网络错误，没有收到响应
+      errorMessage.value = '网络连接失败，请检查网络连接后重试'
+    } else {
+      // 其他错误
+      errorMessage.value = '登录失败，请稍后重试'
+    }
   } finally {
     isLoading.value = false
   }
@@ -147,6 +175,6 @@ const goToRegister = () => {
 }
 
 const goToForgotPassword = () => {
-    router.push('/auth/forgot-password')
+  router.push('/auth/forgot-password')
 }
 </script>

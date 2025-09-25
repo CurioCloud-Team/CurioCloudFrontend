@@ -15,45 +15,115 @@
       <p class="text-gray-500">您的账户已创建完成</p>
     </div>
 
-    <!-- 注册信息确认 -->
-    <div class="bg-gray-50 rounded-xl p-6 mb-6">
+    <!-- 邮箱验证提醒 -->
+    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-6" v-if="!isLoading && userProfile && !userProfile.is_verified">
+      <div class="flex items-start">
+        <svg class="w-6 h-6 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+        </svg>
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold text-yellow-800 mb-2">请验证您的邮箱</h3>
+          <p class="text-yellow-700 mb-4">
+            我们已向 <strong>{{ userProfile.email }}</strong> 发送了一封验证邮件。请点击邮件中的链接完成邮箱验证。
+          </p>
+          <button 
+            @click="resendVerification"
+            class="btn btn-outline btn-sm"
+            :disabled="isResending || countdown > 0"
+          >
+            <span v-if="isResending" class="loading loading-spinner loading-sm"></span>
+            <span v-if="!isResending && countdown <= 0">重新发送验证邮件</span>
+            <span v-else>{{ countdown }}秒后可重发</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 验证成功提示 -->
+    <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-6" v-if="!isLoading && userProfile && userProfile.is_verified">
+      <div class="flex items-center">
+        <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div>
+          <h3 class="text-lg font-semibold text-green-800">邮箱已验证</h3>
+          <p class="text-green-700">您的邮箱 {{ userProfile.email }} 已完成验证。</p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-gray-50 rounded-xl p-6 mb-6" v-if="!isLoading && userProfile">
       <h3 class="text-lg font-semibold text-gray-900 mb-4">账户详情</h3>
       <div class="space-y-3">
         <div class="flex justify-between">
           <span class="text-gray-600">用户名</span>
-          <span class="font-medium">{{ registrationInfo.username || 'new_user' }}</span>
+          <span class="font-medium">{{ userProfile.username }}</span>
         </div>
         <div class="flex justify-between">
           <span class="text-gray-600">邮箱</span>
-          <span class="font-medium">{{ registrationInfo.email || 'user@example.com' }}</span>
+          <span class="font-medium">{{ userProfile.email }}</span>
         </div>
+        <div class="flex justify-between" v-if="userProfile.full_name">
+          <span class="text-gray-600">全名</span>
+          <span class="font-medium">{{ userProfile.full_name }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">注册时间</span>
+          <span class="font-medium">{{ registrationTime }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">账户状态</span>
+          <span class="font-medium" :class="userProfile.is_verified ? 'text-green-600' : 'text-yellow-600'">
+            {{ userProfile.is_verified ? '已验证' : '待验证' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 加载状态 -->
+    <div class="bg-gray-50 rounded-xl p-6 mb-6" v-if="isLoading">
+      <div class="flex items-center justify-center py-8">
+        <div class="loading loading-spinner loading-lg"></div>
+        <span class="ml-3 text-gray-600">加载用户信息中...</span>
+      </div>
+    </div>
+
+    <!-- 错误状态 -->
+    <div class="alert alert-error mb-6" v-if="errorMessage">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <div>
+        <h3 class="font-bold">获取信息失败</h3>
+        <div class="text-xs">{{ errorMessage }}</div>
       </div>
     </div>
 
     <!-- 操作按钮 -->
     <div class="space-y-4">
       <button 
-        @click="goToLogin"
+        @click="goToDashboard"
         class="btn btn-outline w-full"
+        v-if="!isLoading && userProfile && userProfile.is_verified"
       >
-        前往登录
+        进入系统
       </button>
     </div>
-
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuth } from '@/composables/useAuth'
+import { getUserProfileAPI, type UserResponse } from '@/services/auth'
 
 const router = useRouter()
+const { userInfo } = useAuth()
 
-// 注册信息（实际使用时从注册表单传递）
-const registrationInfo = ref({
-  username: '',
-  email: ''
-})
+// 用户信息
+const userProfile = ref<UserResponse | null>(null)
+const isLoading = ref(true)
+const errorMessage = ref('')
 
 // 注册时间
 const registrationTime = ref('')
@@ -62,16 +132,37 @@ const registrationTime = ref('')
 const isResending = ref(false)
 const countdown = ref(0)
 
-onMounted(() => {
-  // 模拟从注册表单获取信息
-  // 实际实现时可以通过路由参数或状态管理获取
-  registrationInfo.value = {
-    username: 'new_user',
-    email: 'user@example.com'
+onMounted(async () => {
+  try {
+    // 获取用户完整资料
+    const profile = await getUserProfileAPI()
+    userProfile.value = profile
+    
+    // 设置注册时间
+    registrationTime.value = new Date(profile.created_at).toLocaleString('zh-CN')
+    
+  } catch (error: any) {
+    console.error('获取用户资料失败:', error)
+    
+    // 如果API调用失败，使用useAuth中的用户信息作为fallback
+    if (userInfo.value) {
+      userProfile.value = {
+        id: 0, // 临时ID
+        username: userInfo.value.username,
+        email: userInfo.value.email,
+        full_name: null,
+        is_active: true,
+        is_verified: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+      registrationTime.value = new Date().toLocaleString('zh-CN')
+    } else {
+      errorMessage.value = '获取用户信息失败，请刷新页面重试'
+    }
+  } finally {
+    isLoading.value = false
   }
-  
-  // 设置注册时间
-  registrationTime.value = new Date().toLocaleString('zh-CN')
 })
 
 const resendVerification = async () => {
@@ -81,7 +172,7 @@ const resendVerification = async () => {
   
   try {
     // TODO: 调用重发验证邮件API
-    console.log('重发验证邮件到:', registrationInfo.value.email)
+    console.log('重发验证邮件到:', userProfile.value?.email)
     
     // 模拟API调用
     await new Promise(resolve => setTimeout(resolve, 2000))
@@ -110,13 +201,7 @@ const startCountdown = () => {
   }, 1000)
 }
 
-const goToLogin = () => {
-  router.push('/auth/login')
-}
-
-const contactSupport = () => {
-  // TODO: 打开客服聊天或跳转到帮助页面
-  console.log('联系客服')
-  // window.open('mailto:support@curiocloud.com')
+const goToDashboard = () => {
+  router.push('/dashboard')
 }
 </script>
