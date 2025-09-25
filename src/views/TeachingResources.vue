@@ -72,11 +72,26 @@
           </div>
         </div>
 
+        <!-- 加载状态 -->
+        <div v-if="isLoadingPPTs" class="text-center py-12">
+          <div class="loading loading-spinner loading-lg text-primary"></div>
+          <p class="mt-4 text-base-content/60">正在加载 PPT 项目...</p>
+        </div>
+
+        <!-- 错误状态 -->
+        <div v-else-if="pptError" class="text-center py-12">
+          <svg class="w-16 h-16 mx-auto mb-4 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+          <p class="text-error mb-4">{{ pptError }}</p>
+          <button class="btn btn-primary btn-sm" @click="loadPPTProjects">重试</button>
+        </div>
+
         <!-- PPT Grid -->
-        <div v-if="filteredPPTs.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div v-else-if="filteredPPTs.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div 
             v-for="ppt in filteredPPTs" 
-            :key="ppt.id" 
+            :key="ppt.project_id" 
             class="card bg-base-200 shadow hover:shadow-lg transition-shadow cursor-pointer"
             @click="viewPPT(ppt)"
           >
@@ -84,11 +99,11 @@
               <div class="flex items-start justify-between">
                 <div class="flex-1">
                   <h4 class="font-semibold text-sm mb-1 line-clamp-2">{{ ppt.title }}</h4>
-                  <p class="text-xs text-base-content/60 mb-2">{{ ppt.subject }} · {{ ppt.grade }}</p>
+                  <p class="text-xs text-base-content/60 mb-2">{{ ppt.scenario }} · {{ ppt.status }}</p>
                   <div class="flex items-center gap-2 text-xs text-base-content/60">
-                    <span>{{ ppt.slideCount }} 页</span>
+                    <span>{{ ppt.slides_data?.length || 0 }} 页</span>
                     <span>·</span>
-                    <span>{{ formatDate(ppt.createTime) }}</span>
+                    <span>{{ formatDate(new Date(ppt.created_at * 1000).toISOString()) }}</span>
                   </div>
                 </div>
                 <div class="dropdown dropdown-end">
@@ -98,8 +113,7 @@
                     </svg>
                   </button>
                   <ul class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-32">
-                    <li><a @click.stop="downloadPPT(ppt)">下载</a></li>
-                    <li><a @click.stop="deletePPT(ppt.id)">删除</a></li>
+                    <li><a @click.stop="deletePPT(ppt.project_id)">删除</a></li>
                   </ul>
                 </div>
               </div>
@@ -205,12 +219,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { savedPPTs as mockSavedPPTs, type SavedPPT } from '../data/mockPPTs'
 import { generatePPTFromLessonPlanAPI, getLessonPlansAPI } from '@/services/teaching'
+import { getPPTProjectsAPI, deletePPTProjectAPI, type LandPPTProject } from '@/services/ppt'
 import type { LessonPlanListResponse } from '@/types/teaching'
-
-const router = useRouter()
 
 // 响应式数据
 const showOutlineSelector = ref(false)
@@ -224,8 +235,10 @@ const lessonPlans = ref<LessonPlanListResponse[]>([])
 const isLoadingLessonPlans = ref(false)
 const lessonPlansError = ref<string | null>(null)
 
-// 模拟保存的PPT数据
-const savedPPTs = ref<SavedPPT[]>(mockSavedPPTs)
+// PPT数据
+const savedPPTs = ref<LandPPTProject[]>([])
+const isLoadingPPTs = ref(false)
+const pptError = ref<string | null>(null)
 
 // 计算属性
 const outlines = computed(() => lessonPlans.value)
@@ -245,7 +258,8 @@ const filteredPPTs = computed(() => {
   if (searchKeyword.value) {
     result = result.filter(ppt => 
       ppt.title.includes(searchKeyword.value) ||
-      ppt.subject.includes(searchKeyword.value)
+      ppt.topic.includes(searchKeyword.value) ||
+      ppt.scenario.includes(searchKeyword.value)
     )
   }
   
@@ -255,10 +269,11 @@ const filteredPPTs = computed(() => {
       case 'title':
         return a.title.localeCompare(b.title)
       case 'subject':
-        return a.subject.localeCompare(b.subject)
+        // LandPPT没有subject字段，使用scenario代替
+        return a.scenario.localeCompare(b.scenario)
       case 'createTime':
       default:
-        return new Date(b.createTime).getTime() - new Date(a.createTime).getTime()
+        return b.created_at - a.created_at
     }
   })
   
@@ -269,7 +284,7 @@ const recentCount = computed(() => {
   const sevenDaysAgo = new Date()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
   return savedPPTs.value.filter(ppt => 
-    new Date(ppt.createTime) > sevenDaysAgo
+    new Date(ppt.created_at * 1000) > sevenDaysAgo
   ).length
 })
 
@@ -288,6 +303,20 @@ const loadLessonPlans = async () => {
   }
 }
 
+const loadPPTProjects = async () => {
+  try {
+    isLoadingPPTs.value = true
+    pptError.value = null
+    const data = await getPPTProjectsAPI()
+    savedPPTs.value = data.projects
+  } catch (error) {
+    console.error('加载PPT项目列表失败:', error)
+    pptError.value = '加载PPT项目列表失败，请稍后重试'
+  } finally {
+    isLoadingPPTs.value = false
+  }
+}
+
 const generatePPT = async () => {
   if (!selectedOutlineId.value) return
   
@@ -296,8 +325,9 @@ const generatePPT = async () => {
     const response = await generatePPTFromLessonPlanAPI(selectedOutlineId.value)
     
     if (response.success && response.ppt_project_id) {
-      // 跳转到PPT生成结果页面，传递PPT项目ID
-      router.push(`/dashboard/ppt-generation-result/${response.ppt_project_id}`)
+      // 跳转到LandPPT的TODO确认页面
+      const landpptUrl = `${import.meta.env.VITE_LANDPPT_BASE_URL}/projects/${response.ppt_project_id}/todo`
+      window.open(landpptUrl, '_blank')
     } else {
       // 处理生成失败的情况
       console.error('PPT生成失败:', response.message)
@@ -311,20 +341,25 @@ const generatePPT = async () => {
   }
 }
 
-const viewPPT = (ppt: SavedPPT) => {
-  router.push(`/dashboard/ppt-viewer/${ppt.id}`)
+const viewPPT = (ppt: LandPPTProject) => {
+  // 跳转到LandPPT的项目详情页面
+  const landpptUrl = `${import.meta.env.VITE_LANDPPT_BASE_URL}/projects/${ppt.project_id}`
+  window.open(landpptUrl, '_blank')
 }
 
-const downloadPPT = (ppt: any) => {
-  // 下载PPT
-  console.log('下载PPT:', ppt.downloadUrl)
-  // 实际实现中应该处理文件下载
-}
-
-const deletePPT = (pptId: number) => {
-  const index = savedPPTs.value.findIndex(ppt => ppt.id === pptId)
-  if (index > -1) {
-    savedPPTs.value.splice(index, 1)
+const deletePPT = async (pptId: string) => {
+  if (confirm('确定要删除这个PPT项目吗？')) {
+    try {
+      await deletePPTProjectAPI(pptId)
+      // 从本地列表中移除
+      const index = savedPPTs.value.findIndex(ppt => ppt.project_id === pptId)
+      if (index > -1) {
+        savedPPTs.value.splice(index, 1)
+      }
+    } catch (error) {
+      console.error('删除PPT项目失败:', error)
+      // 可以在这里显示错误提示
+    }
   }
 }
 
@@ -338,7 +373,8 @@ const formatDate = (dateString: string) => {
 }
 
 onMounted(() => {
-  // 页面加载时获取教案列表
+  // 页面加载时获取教案列表和PPT项目列表
   loadLessonPlans()
+  loadPPTProjects()
 })
 </script>
