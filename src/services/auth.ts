@@ -1,21 +1,21 @@
 import axios from 'axios'
 import type {
   UserLogin,
-  UserResponse,
   AuthResponse,
   UserCreate,
+  UserProfileResponse,
   UserProfileUpdate,
-  HealthCheckResponse
+  MessageResponse
 } from '@/types/auth'
 
 // 重新导出类型，以便其他模块可以从这里导入
 export type {
   UserLogin,
-  UserResponse,
   AuthResponse,
   UserCreate,
+  UserProfileResponse,
   UserProfileUpdate,
-  HealthCheckResponse
+  MessageResponse
 } from '@/types/auth'
 
 // API 基础 URL
@@ -72,19 +72,25 @@ export const registerAPI = async (userData: UserCreate): Promise<AuthResponse> =
 }
 
 // 获取用户资料 API
-export const getUserProfileAPI = async (): Promise<UserResponse> => {
-  const response = await api.get<UserResponse>('/api/user/profile')
+export const getUserProfileAPI = async (): Promise<UserProfileResponse> => {
+  const response = await api.get<UserProfileResponse>('/api/user/profile')
   return response.data
 }
 
 // 更新用户资料 API
-export const updateUserProfileAPI = async (profileData: UserProfileUpdate): Promise<UserResponse> => {
-  const response = await api.put<UserResponse>('/api/user/profile', profileData)
+export const updateUserProfileAPI = async (profileData: UserProfileUpdate): Promise<UserProfileResponse> => {
+  const response = await api.put<UserProfileResponse>('/api/user/profile', profileData)
+  return response.data
+}
+
+// 获取用户状态 API
+export const getUserStatusAPI = async (): Promise<MessageResponse> => {
+  const response = await api.get<MessageResponse>('/api/user/profile/status')
   return response.data
 }
 
 // 健康检查 API
-export const healthCheckAPI = async (): Promise<HealthCheckResponse> => {
-  const response = await api.get<HealthCheckResponse>('/api/auth/health')
+export const healthCheckAPI = async (): Promise<MessageResponse> => {
+  const response = await api.get<MessageResponse>('/api/auth/health')
   return response.data
 }

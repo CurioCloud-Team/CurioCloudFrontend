@@ -106,6 +106,11 @@ const routes = [
         component: PPTGenerationResult
       },
       {
+        path: 'ppt-generation-result/:pptProjectId',
+        name: 'PPTGenerationResultByProject',
+        component: PPTGenerationResult
+      },
+      {
         path: 'ppt-viewer/:pptId',
         name: 'PPTViewer',
         component: PPTViewer

@@ -2,7 +2,7 @@
 
 // 会话相关类型
 export interface StartConversationRequest {
-  use_dynamic_mode?: boolean
+  use_dynamic_mode?: boolean | null
 }
 
 export interface StartConversationResponse {
@@ -30,8 +30,8 @@ export interface SessionInfo {
   is_dynamic_mode: boolean
   question_count: number
   max_questions: number
-  current_step: string | null
-  collected_data: Record<string, any>
+  current_step?: string | null
+  collected_data: object
   created_at: string
 }
 
@@ -53,7 +53,7 @@ export interface LessonPlan {
   teaching_outline: string
   activities: LessonPlanActivity[]
   created_at: string | null
-  web_search_info?: Record<string, any> | null
+  web_search_info?: object | null
 }
 
 export interface LessonPlanActivity {
@@ -82,13 +82,13 @@ export interface PPTGenerationResponse {
 
 export interface PPTStatusResponse {
   ppt_project_id: string
-  status: Record<string, any>
+  status: object
 }
 
 export interface PPTSlidesResponse {
   project_id: string
   title: string
   slides_html: string | null
-  slides_data: Record<string, any>[]
+  slides_data: object[]
   slides_count: number
 }

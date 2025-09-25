@@ -11,7 +11,7 @@ export interface UserResponse {
   id: number
   username: string
   email: string
-  full_name: string | null
+  full_name?: string | null
   is_active: boolean
   is_verified: boolean
   created_at: string
@@ -21,7 +21,7 @@ export interface UserResponse {
 // 令牌接口
 export interface Token {
   access_token: string
-  token_type: string
+  token_type?: string
   expires_in: number
 }
 
@@ -29,22 +29,40 @@ export interface Token {
 export interface AuthResponse {
   user: UserResponse
   token: Token
-  message: string
+  message?: string
 }
 
 // 用户注册接口
 export interface UserCreate {
   username: string
   email: string
-  full_name?: string
+  full_name?: string | null
   password: string
   confirm_password: string
 }
 
+// 用户资料响应接口
+export interface UserProfileResponse {
+  id: number
+  username: string
+  email: string
+  full_name?: string | null
+  is_active: boolean
+  is_verified: boolean
+  created_at: string
+  updated_at: string
+}
+
 // 用户资料更新接口
 export interface UserProfileUpdate {
-  full_name?: string
-  email?: string
+  full_name?: string | null
+  email?: string | null
+}
+
+// 通用消息响应接口
+export interface MessageResponse {
+  message: string
+  success?: boolean
 }
 
 // 健康检查响应接口

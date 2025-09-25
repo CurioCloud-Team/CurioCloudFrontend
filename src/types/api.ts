@@ -17,3 +17,14 @@ export interface ApiError {
   code?: string | number
   details?: any
 }
+
+// HTTP 验证错误
+export interface HTTPValidationError {
+  detail?: ValidationError[]
+}
+
+export interface ValidationError {
+  loc: (string | number)[]
+  msg: string
+  type: string
+}

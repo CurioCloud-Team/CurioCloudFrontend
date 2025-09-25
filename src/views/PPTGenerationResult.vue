@@ -322,12 +322,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getOutlineDetail } from '../data/mockOutlines'
+import { getPPTStatusAPI, getPPTSlidesAPI, generatePPTFromLessonPlanAPI } from '@/services/teaching'
 
 const route = useRoute()
 const router = useRouter()
 
 // 响应式数据
-const planId = ref(parseInt(route.params.planId as string))
+const planId = ref<number | null>(null)
+const pptProjectId = ref<string | null>(null)
 const generationStatus = ref<'generating' | 'completed' | 'error'>('generating')
 const generationProgress = ref(0)
 const isProcessing = ref(false)
@@ -335,29 +337,13 @@ const errorMessage = ref('')
 const currentSlideIndex = ref(0)
 
 // 教学大纲信息
-const outlineInfo = ref(getOutlineDetail(planId.value))
+const outlineInfo = ref<any>(null)
 
 // PPT 生成结果
-const pptResult = ref<{
-  id: string
-  slideCount: number
-  fileSize: number
-  generationTime: number
-  downloadUrl: string
-  slides: Array<{
-    title: string
-    content: string
-    type: string
-    elements?: string[]
-    bulletPoints?: string[]
-    steps?: string[]
-    notes?: string[]
-    exercises?: Array<{
-      question: string
-      options?: string[]
-    }>
-  }>
-} | null>(null)
+const pptResult = ref<any>(null)
+
+// 检查路由参数
+const isByProjectId = computed(() => route.params.pptProjectId !== undefined)
 
 // 计算属性
 const statusText = computed(() => {
@@ -387,125 +373,117 @@ const statusDescription = computed(() => {
 })
 
 const currentSlide = computed(() => {
-  if (!pptResult.value || !pptResult.value.slides) return null
-  return pptResult.value.slides[currentSlideIndex.value] || null
+  if (!pptResult.value || !pptResult.value.slides_data) return null
+  return pptResult.value.slides_data[currentSlideIndex.value] || null
 })
 
 // 方法
-const simulateGeneration = () => {
-  const interval = setInterval(() => {
-    generationProgress.value += Math.random() * 15
-    if (generationProgress.value >= 100) {
-      generationProgress.value = 100
-      clearInterval(interval)
-      
-      // 模拟生成完成
-      setTimeout(() => {
+const loadExistingPPT = async () => {
+  if (!pptProjectId.value) return
+  
+  try {
+    // 获取PPT状态
+    const statusResponse = await getPPTStatusAPI(pptProjectId.value)
+    
+    // 根据状态处理
+    if (statusResponse.status && typeof statusResponse.status === 'object') {
+      const status = statusResponse.status as any
+      if (status.status === 'completed') {
         generationStatus.value = 'completed'
-        pptResult.value = {
-          id: `ppt_${Date.now()}`,
-          slideCount: 6,
-          fileSize: 5.2 * 1024 * 1024, // 5.2MB
-          generationTime: 125, // 125秒
-          downloadUrl: '/api/ppts/download/temp_id',
-          slides: [
-            {
-              title: '分数的初步认识',
-              content: '本节课将通过生动有趣的方式，帮助同学们初步认识分数，理解分数在日常生活中的重要作用，为后续学习打下坚实的基础。',
-              type: '标题页',
-              elements: ['标题', '副标题', '装饰']
-            },
-            {
-              title: '什么是分数',
-              content: '分数表示一个整体的一部分。当我们把一个苹果平均分成两份时，每一份就是这个苹果的二分之一，记作 1/2。',
-              type: '内容页',
-              elements: ['图片', '文字', '动画'],
-              bulletPoints: [
-                '分数来源于分割和测量的需要',
-                '分数表示部分与整体的关系',
-                '生活中到处都有分数的应用',
-                '分数让我们能够表达不够整数的量'
-              ]
-            },
-            {
-              title: '分数的各部分名称',
-              content: '每个分数都由三部分组成：上面的数叫分子，下面的数叫分母，中间的横线叫分数线。',
-              type: '内容页',
-              elements: ['图表', '标注', '文字'],
-              bulletPoints: [
-                '分子：表示取了多少份',
-                '分母：表示平均分成多少份',
-                '分数线：表示除法运算',
-                '读法：先读分母，再读"分之"，最后读分子'
-              ]
-            },
-            {
-              title: '实践活动：折纸游戏',
-              content: '通过动手折纸，直观理解二分之一的概念',
-              type: '活动页',
-              elements: ['操作步骤', '图片', '说明'],
-              steps: [
-                '准备一张正方形纸片',
-                '将纸片对折，确保两边完全重合',
-                '展开纸片，观察折痕将纸片分成两个相等的部分',
-                '涂色其中一部分，这就是整张纸的 1/2',
-                '尝试折出 1/4、1/8 等其他分数'
-              ],
-              notes: [
-                '确保折叠时两边完全重合',
-                '可以用不同颜色区分各个部分',
-                '鼓励学生说出自己的发现'
-              ]
-            },
-            {
-              title: '分数的读写练习',
-              content: '掌握分数的正确读法和写法是学好分数的基础',
-              type: '内容页',
-              elements: ['示例', '练习', '音频'],
-              bulletPoints: [
-                '写分数时要先画分数线',
-                '分母写在分数线下方',
-                '分子写在分数线上方',
-                '读分数要清晰准确'
-              ]
-            },
-            {
-              title: '课堂练习',
-              content: '通过练习巩固今天学到的分数知识',
-              type: '练习页',
-              elements: ['题目', '选择', '判断'],
-              exercises: [
-                {
-                  question: '把一个圆平均分成4份，其中的1份用分数表示是？',
-                  options: ['A. 1/2', 'B. 1/3', 'C. 1/4', 'D. 1/5']
-                },
-                {
-                  question: '分数 3/5 中，分子是多少？',
-                  options: ['A. 3', 'B. 5', 'C. 8', 'D. 2']
-                },
-                {
-                  question: '下面哪个分数表示把一个整体平均分成8份？',
-                  options: ['A. 3/5', 'B. 2/8', 'C. 5/3', 'D. 8/2']
-                }
-              ]
-            }
-          ]
-        }
-      }, 1000)
+        // 获取PPT内容
+        const slidesResponse = await getPPTSlidesAPI(pptProjectId.value)
+        pptResult.value = slidesResponse
+      } else if (status.status === 'processing' || status.status === 'pending') {
+        generationStatus.value = 'generating'
+        // 继续轮询状态
+        pollPPTStatus()
+      } else {
+        generationStatus.value = 'error'
+        errorMessage.value = 'PPT生成失败'
+      }
     }
-  }, 200)
+  } catch (error) {
+    console.error('加载PPT失败:', error)
+    generationStatus.value = 'error'
+    errorMessage.value = '加载PPT失败，请重试'
+  }
+}
+
+const generatePPTFromOutline = async () => {
+  if (!planId.value) return
+  
+  try {
+    // 调用API生成PPT
+    const response = await generatePPTFromLessonPlanAPI(planId.value)
+    
+    if (response.success && response.ppt_project_id) {
+      pptProjectId.value = response.ppt_project_id
+      // 开始轮询状态
+      pollPPTStatus()
+    } else {
+      generationStatus.value = 'error'
+      errorMessage.value = response.message || 'PPT生成失败'
+    }
+  } catch (error) {
+    console.error('生成PPT失败:', error)
+    generationStatus.value = 'error'
+    errorMessage.value = '网络连接失败，请检查网络后重试'
+  }
+}
+
+const pollPPTStatus = async () => {
+  if (!pptProjectId.value) return
+  
+  const pollInterval = setInterval(async () => {
+    try {
+      const statusResponse = await getPPTStatusAPI(pptProjectId.value!)
+      
+      if (statusResponse.status && typeof statusResponse.status === 'object') {
+        const status = statusResponse.status as any
+        
+        // 更新进度（如果有的话）
+        if (status.progress !== undefined) {
+          generationProgress.value = Math.min(status.progress, 100)
+        }
+        
+        if (status.status === 'completed') {
+          clearInterval(pollInterval)
+          generationStatus.value = 'completed'
+          // 获取PPT内容
+          const slidesResponse = await getPPTSlidesAPI(pptProjectId.value!)
+          pptResult.value = slidesResponse
+        } else if (status.status === 'failed' || status.status === 'error') {
+          clearInterval(pollInterval)
+          generationStatus.value = 'error'
+          errorMessage.value = status.message || 'PPT生成失败'
+        }
+      }
+    } catch (error) {
+      console.error('轮询PPT状态失败:', error)
+      clearInterval(pollInterval)
+      generationStatus.value = 'error'
+      errorMessage.value = '检查生成状态失败'
+    }
+  }, 2000) // 每2秒检查一次
+  
+  // 5分钟超时
+  setTimeout(() => {
+    clearInterval(pollInterval)
+    if (generationStatus.value === 'generating') {
+      generationStatus.value = 'error'
+      errorMessage.value = '生成超时，请稍后重试'
+    }
+  }, 5 * 60 * 1000)
 }
 
 const savePPT = async () => {
-  if (!pptResult.value) return
+  if (!pptResult.value || !pptProjectId.value) return
   
   isProcessing.value = true
   
   try {
-    // 模拟保存到教学资源
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // 跳转回教学资源页面
+    // 这里可以调用保存PPT的API，或者直接跳转
+    // 目前先跳转回教学资源页面
     router.push('/dashboard/teaching-resources')
   } catch (error) {
     console.error('保存失败:', error)
@@ -520,50 +498,43 @@ const discardPPT = () => {
 }
 
 const retryGeneration = () => {
-  generationStatus.value = 'generating'
-  generationProgress.value = 0
-  pptResult.value = null
-  errorMessage.value = ''
-  simulateGeneration()
+  if (planId.value) {
+    generationStatus.value = 'generating'
+    generationProgress.value = 0
+    pptResult.value = null
+    errorMessage.value = ''
+    generatePPTFromOutline()
+  }
 }
 
 const formatFileSize = (bytes: number) => {
+  if (!bytes) return '未知'
   const mb = bytes / (1024 * 1024)
   return `${mb.toFixed(1)} MB`
 }
 
 const formatDuration = (seconds: number) => {
+  if (!seconds) return '未知'
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = seconds % 60
   return `${minutes}分${remainingSeconds}秒`
 }
 
-// 模拟API调用生成PPT
-const generatePPTFromOutline = async () => {
-  if (!outlineInfo.value) {
-    generationStatus.value = 'error'
-    errorMessage.value = '未找到教学大纲信息'
-    return
-  }
-
-  // 模拟调用后端API
-  try {
-    simulateGeneration()
-  } catch (error) {
-    generationStatus.value = 'error'
-    errorMessage.value = '网络连接失败，请检查网络后重试'
-  }
-}
-
 onMounted(() => {
-  if (!outlineInfo.value) {
-    // 如果没有找到对应的大纲，返回教学资源页面
-    router.push('/dashboard/teaching-resources')
-    return
+  if (isByProjectId.value) {
+    // 新的路由：基于PPT项目ID
+    pptProjectId.value = route.params.pptProjectId as string
+    loadExistingPPT()
+  } else {
+    // 旧的路由：基于计划ID，需要先生成PPT
+    planId.value = parseInt(route.params.planId as string)
+    outlineInfo.value = getOutlineDetail(planId.value)
+    if (!outlineInfo.value) {
+      router.push('/dashboard/teaching-resources')
+      return
+    }
+    generatePPTFromOutline()
   }
-  
-  // 开始生成PPT
-  generatePPTFromOutline()
 })
 </script>
 

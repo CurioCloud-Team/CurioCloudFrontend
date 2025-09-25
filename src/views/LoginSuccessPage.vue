@@ -73,13 +73,13 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
-import { getUserProfileAPI, type UserResponse } from '@/services/auth'
+import { getUserProfileAPI, type UserProfileResponse } from '@/services/auth'
 
 const router = useRouter()
 const { userInfo, initAuth } = useAuth()
 
 // 用户完整资料
-const userProfile = ref<UserResponse | null>(null)
+const userProfile = ref<UserProfileResponse | null>(null)
 const isLoadingProfile = ref(false)
 
 // 倒计时

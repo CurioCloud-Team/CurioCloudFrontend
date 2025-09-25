@@ -121,41 +121,71 @@
     <!-- Outline Selector Modal -->
     <div v-if="showOutlineSelector" class="modal modal-open">
       <div class="modal-box w-11/12 max-w-2xl">
-        <h3 class="font-bold text-lg mb-4">选择教学大纲</h3>
+        <h3 class="font-bold text-lg mb-4">选择教案</h3>
         <div class="form-control mb-4">
           <input 
             type="text" 
-            placeholder="搜索教学大纲..." 
+            placeholder="搜索教案..." 
             class="input input-bordered"
             v-model="outlineSearchKeyword"
           />
         </div>
         <div class="max-h-96 overflow-y-auto space-y-2">
-          <div 
-            v-for="outline in filteredOutlines" 
-            :key="outline.id"
-            class="card bg-base-200 shadow-sm hover:shadow cursor-pointer transition-shadow"
-            :class="{ 'ring-2 ring-primary': selectedOutlineId === outline.id }"
-            @click="selectedOutlineId = outline.id"
-          >
-            <div class="card-body p-4">
-              <div class="flex items-start justify-between">
-                <div>
-                  <h4 class="font-semibold mb-1">{{ outline.title }}</h4>
-                  <p class="text-sm text-base-content/60 mb-2">{{ outline.subject }} · {{ outline.grade }}</p>
-                  <p class="text-xs text-base-content/60">{{ outline.description }}</p>
-                </div>
-                <div class="flex items-center">
-                  <input 
-                    type="radio" 
-                    :value="outline.id" 
-                    v-model="selectedOutlineId"
-                    class="radio radio-primary"
-                    @click.stop
-                  />
+          <!-- 加载状态 -->
+          <div v-if="isLoadingLessonPlans" class="text-center py-8">
+            <div class="loading loading-spinner loading-lg text-primary"></div>
+            <p class="mt-4 text-base-content/60">正在加载教案列表...</p>
+          </div>
+          
+          <!-- 错误状态 -->
+          <div v-else-if="lessonPlansError" class="text-center py-8">
+            <svg class="w-16 h-16 mx-auto mb-4 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+            <p class="text-error mb-4">{{ lessonPlansError }}</p>
+            <button class="btn btn-primary btn-sm" @click="loadLessonPlans">重试</button>
+          </div>
+          
+          <!-- 教案列表 -->
+          <div v-else-if="filteredOutlines.length > 0" class="space-y-4">
+            <div 
+              v-for="outline in filteredOutlines" 
+              :key="outline.id"
+              class="card bg-base-200 shadow-sm hover:shadow cursor-pointer transition-shadow border-2"
+              :class="{ 
+                'border-primary ring-2 ring-primary/20': selectedOutlineId === outline.id,
+                'border-base-300': selectedOutlineId !== outline.id
+              }"
+              @click="selectedOutlineId = outline.id"
+            >
+              <div class="card-body p-4">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h4 class="font-semibold mb-1">{{ outline.title }}</h4>
+                    <p class="text-sm text-base-content/60 mb-2">{{ outline.subject }} · {{ outline.grade }}</p>
+                    <p class="text-xs text-base-content/60">创建时间: {{ formatDate(outline.created_at) }}</p>
+                  </div>
+                  <div class="flex items-center">
+                    <input 
+                      type="radio" 
+                      :value="outline.id" 
+                      v-model="selectedOutlineId"
+                      class="radio radio-primary"
+                      @click.stop
+                    />
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
+          
+          <!-- 空状态 -->
+          <div v-else class="text-center py-8">
+            <svg class="w-16 h-16 mx-auto mb-4 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <p class="text-lg mb-2">暂无教案</p>
+            <p class="text-sm text-base-content/60">请先创建教案后再进行PPT生成</p>
           </div>
         </div>
         <div class="modal-action">
@@ -176,8 +206,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { mockOutlineDetails } from '../data/mockOutlines'
 import { savedPPTs as mockSavedPPTs, type SavedPPT } from '../data/mockPPTs'
+import { generatePPTFromLessonPlanAPI, getLessonPlansAPI } from '@/services/teaching'
+import type { LessonPlanListResponse } from '@/types/teaching'
 
 const router = useRouter()
 
@@ -188,18 +219,22 @@ const outlineSearchKeyword = ref('')
 const searchKeyword = ref('')
 const sortBy = ref('createTime')
 
+// 教案数据
+const lessonPlans = ref<LessonPlanListResponse[]>([])
+const isLoadingLessonPlans = ref(false)
+const lessonPlansError = ref<string | null>(null)
+
 // 模拟保存的PPT数据
 const savedPPTs = ref<SavedPPT[]>(mockSavedPPTs)
 
 // 计算属性
-const outlines = computed(() => Object.values(mockOutlineDetails))
+const outlines = computed(() => lessonPlans.value)
 
 const filteredOutlines = computed(() => {
   if (!outlineSearchKeyword.value) return outlines.value
   return outlines.value.filter(outline => 
     outline.title.includes(outlineSearchKeyword.value) ||
-    outline.subject.includes(outlineSearchKeyword.value) ||
-    outline.description.includes(outlineSearchKeyword.value)
+    outline.subject.includes(outlineSearchKeyword.value)
   )
 })
 
@@ -239,11 +274,40 @@ const recentCount = computed(() => {
 })
 
 // 方法
-const generatePPT = () => {
-  if (selectedOutlineId.value) {
+const loadLessonPlans = async () => {
+  try {
+    isLoadingLessonPlans.value = true
+    lessonPlansError.value = null
+    const data = await getLessonPlansAPI()
+    lessonPlans.value = data
+  } catch (error) {
+    console.error('加载教案列表失败:', error)
+    lessonPlansError.value = '加载教案列表失败，请稍后重试'
+  } finally {
+    isLoadingLessonPlans.value = false
+  }
+}
+
+const generatePPT = async () => {
+  if (!selectedOutlineId.value) return
+  
+  try {
+    // 调用API生成PPT
+    const response = await generatePPTFromLessonPlanAPI(selectedOutlineId.value)
+    
+    if (response.success && response.ppt_project_id) {
+      // 跳转到PPT生成结果页面，传递PPT项目ID
+      router.push(`/dashboard/ppt-generation-result/${response.ppt_project_id}`)
+    } else {
+      // 处理生成失败的情况
+      console.error('PPT生成失败:', response.message)
+      // 可以在这里显示错误提示
+    }
+  } catch (error) {
+    console.error('生成PPT时出错:', error)
+    // 可以在这里显示错误提示
+  } finally {
     showOutlineSelector.value = false
-    // 跳转到PPT生成页面
-    router.push(`/dashboard/ppt-generation/${selectedOutlineId.value}`)
   }
 }
 
@@ -274,6 +338,7 @@ const formatDate = (dateString: string) => {
 }
 
 onMounted(() => {
-  // 页面加载时的初始化操作
+  // 页面加载时获取教案列表
+  loadLessonPlans()
 })
 </script>

@@ -115,13 +115,13 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
-import { getUserProfileAPI, type UserResponse } from '@/services/auth'
+import { getUserProfileAPI, type UserProfileResponse } from '@/services/auth'
 
 const router = useRouter()
 const { userInfo } = useAuth()
 
 // 用户信息
-const userProfile = ref<UserResponse | null>(null)
+const userProfile = ref<UserProfileResponse | null>(null)
 const isLoading = ref(true)
 const errorMessage = ref('')
 

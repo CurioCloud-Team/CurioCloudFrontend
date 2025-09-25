@@ -9,7 +9,8 @@ import type {
   LessonPlanListResponse,
   PPTGenerationResponse,
   PPTStatusResponse,
-  PPTSlidesResponse
+  PPTSlidesResponse,
+  SessionInfo
 } from '@/types/teaching'
 
 // API 基础 URL
@@ -94,4 +95,23 @@ export const exportPPTFileAPI = async (pptProjectId: string, exportFormat: 'pdf'
     responseType: 'blob'
   })
   return response.data
+}
+
+// 会话管理API
+
+// 获取活跃会话列表
+export const getActiveSessionsAPI = async (): Promise<SessionInfo[]> => {
+  const response = await api.get<SessionInfo[]>('/api/sessions/active')
+  return response.data
+}
+
+// 获取会话详情
+export const getSessionInfoAPI = async (sessionId: string): Promise<SessionInfo> => {
+  const response = await api.get<SessionInfo>(`/api/sessions/${sessionId}`)
+  return response.data
+}
+
+// 删除会话
+export const deleteSessionAPI = async (sessionId: string): Promise<void> => {
+  await api.delete(`/api/sessions/${sessionId}`)
 }
