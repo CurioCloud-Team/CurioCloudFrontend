@@ -11,6 +11,7 @@ import TeachingDesign from '../views/TeachingDesign.vue'
 import TeachingOutlineDetail from '../views/TeachingOutlineDetail.vue'
 import TeachingPlanStart from '../views/TeachingPlanStart.vue'
 import CreateTeachingPlan from '../views/CreateTeachingPlan.vue'
+import LessonPlanDetail from '../views/LessonPlanDetail.vue'
 import TeachingResources from '../views/TeachingResources.vue'
 import ExerciseAssistant from '../views/ExerciseAssistant.vue'
 import ExerciseGenerationResult from '../views/ExerciseGenerationResult.vue'
@@ -88,6 +89,11 @@ const routes = [
         path: 'teaching-design/create',
         name: 'CreateTeachingPlan',
         component: CreateTeachingPlan
+      },
+      {
+        path: 'teaching-design/plan/:planId',
+        name: 'LessonPlanDetail',
+        component: LessonPlanDetail
       },
       {
         path: 'teaching-resources',
