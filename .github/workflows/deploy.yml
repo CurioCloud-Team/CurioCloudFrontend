@@ -25,6 +25,9 @@ jobs:
 
         - name: Build project
           run: npm run build
+          env:
+            VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+            VITE_LANDPPT_BASE_URL: ${{ secrets.VITE_LANDPPT_BASE_URL }}
 
         - name: Deploy via rsync
           uses: burnett01/rsync-deployments@7.1.0
